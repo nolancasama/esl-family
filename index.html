@@ -22,19 +22,27 @@
 ═══════════════════════════════════════════════════════════════════ -->
 <div id="phase-choose" class="phase">
   <div class="page-header">
-    <h1>Choose Your Family</h1>
-    <p id="choose-subtitle">Choose your Grandfather</p>
+    <h1 id="choose-header">This is my grandfather.</h1>
+    <p>したから１つえらんでね！</p>
   </div>
   <div class="page-body">
-    <div id="choose-counter">1 / 6</div>
+    <div id="choose-progress" class="choose-progress">
+      <span class="progress-seg"></span>
+      <span class="progress-seg"></span>
+      <span class="progress-seg"></span>
+      <span class="progress-seg"></span>
+      <span class="progress-seg"></span>
+      <span class="progress-seg"></span>
+    </div>
     <div id="char-grid" class="char-grid"></div>
     <div class="choose-actions">
-      <button id="reroll-btn" class="btn btn-ghost btn-sm" aria-label="New Characters" title="New Characters">
+      <button id="reroll-btn" class="btn btn-ghost btn-sm" aria-label="ほかのキャラクター" title="ほかのキャラクター">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M23 4v6h-6"/>
           <path d="M1 20v-6h6"/>
           <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
         </svg>
+        <span>ほかのキャラクター</span>
       </button>
     </div>
   </div>
@@ -50,7 +58,10 @@
     <div id="assign-picture-area">
 
       <!-- Top overlay: prompt -->
-      <div id="assign-prompt">Who is this?</div>
+      <div id="assign-prompt">
+        <div id="assign-instruction">えいごで言ってみよう！</div>
+        <div id="assign-sentence"></div>
+      </div>
 
       <!-- Character image -->
       <img id="assign-char-img" src="" alt="character">
@@ -76,11 +87,6 @@
         </svg>
       </button>
 
-    </div>
-
-    <!-- Right: role board panel (vertical, full height) -->
-    <div id="assign-board">
-      <div id="board-grid" class="board-grid"></div>
     </div>
 
   </div>
@@ -111,14 +117,11 @@
 ═══════════════════════════════════════════════════════════════════ -->
 <div id="phase-presentation" class="phase">
   <div class="page-header">
-    <h1>Meet My Family!</h1>
-    <p>Listen to your English!</p>
+    <h1>My family</h1>
   </div>
   <div id="pres-wrap">
     <div id="pres-char-frame">
       <img id="pres-char-img" src="" alt="family member" width="160" height="224">
-      <div id="pres-role-label"></div>
-      <div id="pres-char-name"></div>
     </div>
     <div id="pres-progress"></div>
   </div>
@@ -137,17 +140,10 @@
   </div>
 </div>
 
-<!-- Celebration overlay -->
-<div id="celebration"></div>
-
-<!-- Camera flash overlay -->
-<div id="flash-overlay"></div>
-
 <!-- Scripts — load order matters (dependencies first) -->
 <script src="js/characters.js"></script>
 <script src="js/speech.js"></script>
 <script src="js/recorder.js"></script>
-<script src="js/board.js"></script>
 <script src="js/selfie.js"></script>
 <script src="js/presentation.js"></script>
 <script src="js/photo.js"></script>

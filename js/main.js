@@ -10,8 +10,15 @@
   // Order family members are picked in, one at a time.
   const SELECT_ORDER = ['grandfather', 'father', 'brother', 'grandmother', 'mother', 'sister'];
 
-  // Real-art characters — shown only in the "Choose your Brother" step, never elsewhere.
-  const BROTHER_CHAR_IDS = ['g06', 'g08', 'g14', 'g27', 'i02', 'i14', 'i27', 'i41', 'i49'];
+  // Real-art characters, scoped to a single role's choose step — never shown for any other role.
+  const ROLE_CHAR_IDS = {
+    brother:     ['g06', 'g08', 'g14', 'g27', 'i02', 'i14', 'i27', 'i41', 'i49'],
+    grandfather: ['g04', 'g19', 'g34', 'g40', 'g42', 'g47', 'g48', 'i01', 'i03', 'i36'],
+  };
+  const ALL_SCOPED_CHAR_IDS = Object.values(ROLE_CHAR_IDS).flat();
+
+  // How many candidates are shown per choose-phase screen.
+  const POOL_SIZE = 3;
 
   // ── State ─────────────────────────────────────────────────────────
   const state = {
@@ -19,6 +26,8 @@
     rerollUsed:     false,
     roleIndex:      0,    // index into SELECT_ORDER for the choose phase
     pickedIds:      new Set(), // char ids already used by an earlier role
+    scopedList:     null,  // full shuffled candidate list for a scoped-art role, else null
+    scopedPage:     0,     // current page (of POOL_SIZE) into scopedList
     selected:       [],   // 6 chars, in SELECT_ORDER order (set as choose phase proceeds)
     assignIndex:    0,    // index into selected[] / SELECT_ORDER currently being assigned
     assignments:    {},   // { role: { char, audioBlob, transcript } }
@@ -40,18 +49,17 @@
 
   // Choose phase
   const charGrid       = $('char-grid');
-  const chooseCounter  = $('choose-counter');
-  const chooseSubtitle = $('choose-subtitle');
+  const progressSegs   = Array.from(document.querySelectorAll('#choose-progress .progress-seg'));
+  const chooseHeader   = $('choose-header');
   const rerollBtn      = $('reroll-btn');
 
   // Assign phase
   const assignCharImg  = $('assign-char-img');
-  const assignPrompt   = $('assign-prompt');
+  const assignSentence = $('assign-sentence');
   const micBtn         = $('mic-btn');
   const micLabel       = $('mic-label');
   const transcriptBox  = $('transcript-box');
   const feedbackMsg    = $('feedback-msg');
-  const boardGrid      = $('board-grid');
   const undoBtn        = $('undo-btn');
 
   // Selfie phase
@@ -65,8 +73,6 @@
   // Presentation phase
   const presFrame      = $('pres-char-frame');
   const presCharImg    = $('pres-char-img');
-  const presRoleLabel  = $('pres-role-label');
-  const presCharName   = $('pres-char-name');
   const presProgress   = $('pres-progress');
 
   // Photo phase
@@ -85,13 +91,10 @@
   });
   loadingScreen.style.display = 'none';
 
-  Board.init(boardGrid);
   Presentation.init({
-    charImg:   presCharImg,
-    roleLabel: presRoleLabel,
-    charName:  presCharName,
-    progress:  presProgress,
-    frame:     presFrame,
+    charImg:  presCharImg,
+    progress: presProgress,
+    frame:    presFrame,
   });
 
   if (!Speech.isSupported()) {
@@ -117,27 +120,31 @@
   }
 
   function loadChooseStep() {
-    const role   = SELECT_ORDER[state.roleIndex];
-    const gender = Speech.ROLE_GENDER[role];
+    const role     = SELECT_ORDER[state.roleIndex];
+    const gender   = Speech.ROLE_GENDER[role];
+    const scopedIds = ROLE_CHAR_IDS[role];
 
-    state.pool       = buildPoolForRole(role, gender);
+    if (scopedIds) {
+      state.scopedList = Characters.shuffle(
+        Characters.getAll().filter(c => scopedIds.includes(c.id) && !state.pickedIds.has(c.id))
+      );
+      state.scopedPage = 0;
+      state.pool = state.scopedList.slice(0, POOL_SIZE);
+    } else {
+      state.scopedList = null;
+      const exclude = new Set([...state.pickedIds, ...ALL_SCOPED_CHAR_IDS]);
+      state.pool = Characters.buildGenderedPool(gender, POOL_SIZE, exclude);
+    }
     state.rerollUsed = false;
 
-    chooseSubtitle.textContent = `Choose your ${capitalize(role)}`;
-    chooseCounter.textContent  = `${state.roleIndex + 1} / ${SELECT_ORDER.length}`;
+    chooseHeader.textContent = `This is my ${role}.`;
+    progressSegs.forEach((seg, i) => {
+      seg.classList.toggle('done', i < state.roleIndex);
+      seg.classList.toggle('active', i === state.roleIndex);
+    });
 
     renderPool();
     updateChooseUI();
-  }
-
-  function buildPoolForRole(role, gender) {
-    if (role === 'brother') {
-      return Characters.shuffle(
-        Characters.getAll().filter(c => BROTHER_CHAR_IDS.includes(c.id) && !state.pickedIds.has(c.id))
-      );
-    }
-    const exclude = new Set([...state.pickedIds, ...BROTHER_CHAR_IDS]);
-    return Characters.buildGenderedPool(gender, 6, exclude);
   }
 
   function renderPool() {
@@ -175,18 +182,32 @@
   }
 
   function updateChooseUI() {
-    const role = SELECT_ORDER[state.roleIndex];
-    // Brother step already shows every real-art candidate — nothing to reroll.
-    rerollBtn.style.display = role === 'brother' ? 'none' : '';
-    rerollBtn.disabled = state.rerollUsed;
+    if (state.scopedList) {
+      // Only show reroll if there are more candidates than fit on one page.
+      rerollBtn.style.display = state.scopedList.length > POOL_SIZE ? '' : 'none';
+      rerollBtn.disabled = false;
+    } else {
+      rerollBtn.style.display = '';
+      rerollBtn.disabled = state.rerollUsed;
+    }
   }
 
   rerollBtn.addEventListener('click', () => {
+    if (state.scopedList) {
+      // Page through the fixed set in batches of 3, wrapping around.
+      const pageCount = Math.ceil(state.scopedList.length / POOL_SIZE);
+      state.scopedPage = (state.scopedPage + 1) % pageCount;
+      const start = state.scopedPage * POOL_SIZE;
+      state.pool = state.scopedList.slice(start, start + POOL_SIZE);
+      renderPool();
+      return;
+    }
     if (state.rerollUsed) return;
     state.rerollUsed = true;
     const role   = SELECT_ORDER[state.roleIndex];
     const gender = Speech.ROLE_GENDER[role];
-    state.pool = buildPoolForRole(role, gender);
+    const exclude = new Set([...state.pickedIds, ...ALL_SCOPED_CHAR_IDS]);
+    state.pool = Characters.buildGenderedPool(gender, POOL_SIZE, exclude);
     renderPool();
     updateChooseUI();
   });
@@ -200,7 +221,6 @@
   // ══════════════════════════════════════════════════════════════════
   async function enterAssignPhase() {
     showPhase('assign');
-    Board.init(boardGrid);
 
     // Open mic stream now (keep open for all 6 assignments)
     if (Recorder.isSupported() && !state.micOpen) {
@@ -218,12 +238,13 @@
 
   function showCurrentChar() {
     const char = state.selected[state.assignIndex];
+    const role = SELECT_ORDER[state.assignIndex];
 
     // Large character image
     assignCharImg.src = Characters.imgUrl(char);
     assignCharImg.alt = char.name;
 
-    assignPrompt.textContent = 'Who is this?';
+    assignSentence.textContent = `This is my ${role}.`;
     clearFeedback();
     transcriptBox.classList.remove('visible');
     transcriptBox.textContent = '';
@@ -307,9 +328,6 @@
 
     state.assignments[targetRole] = { char, audioBlob, transcript };
 
-    // Update board with fly-in
-    Board.assign(targetRole, char);
-
     showFeedback(`${capTarget}! ✓`, 'success');
 
     state.assignIndex++;
@@ -329,8 +347,6 @@
     state.assignIndex--;
     const role = SELECT_ORDER[state.assignIndex];
     delete state.assignments[role];
-
-    Board.unassign(role);
 
     // Re-start segment for this character
     if (state.micOpen) {
@@ -415,50 +431,45 @@
   async function enterPhotoPhase() {
     showPhase('photo');
 
-    // Start compositing immediately (hidden)
-    photoCanvas.style.opacity = '0';
+    // Canvas is visible from the start so the frames' pop-in reveal plays.
     photoCanvas.style.transition = 'none';
-    const composePromise = Photo.compose(photoCanvas, state.assignments, state.selfieDataURL);
+    photoCanvas.style.opacity = '1';
 
-    // Fire flash + shutter sound
-    playCameraClick();
-    triggerFlash();
-
-    // Wait for both compose and flash peak to settle, then fade in
-    await composePromise;
-    setTimeout(() => {
-      photoCanvas.style.transition = 'opacity 1s ease-in';
-      photoCanvas.style.opacity = '1';
-      setTimeout(() => fireCelebration(), 700);
-    }, 380);
+    // Frames pop in one at a time, the student's own photo last.
+    await Photo.compose(photoCanvas, state.assignments, state.selfieDataURL);
   }
 
-  function triggerFlash() {
-    const overlay = $('flash-overlay');
-    overlay.classList.remove('flashing');
-    void overlay.offsetWidth;  // force reflow so animation re-fires
-    overlay.classList.add('flashing');
+  // ── Shared audio context for UI sound effects ─────────────────────
+  let _audioCtx = null;
+  function getAudioContext() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!_audioCtx) _audioCtx = new AC();
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    return _audioCtx;
   }
 
-  function playCameraClick() {
+  // Short tap blip — plays on every button / character-card click
+  function playClickSound() {
+    const ac = getAudioContext();
+    if (!ac) return;
     try {
-      const ac = new (window.AudioContext || window.webkitAudioContext)();
-      const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.1), ac.sampleRate);
-      const d   = buf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) {
-        const t = i / ac.sampleRate;
-        d[i] = (Math.random() * 2 - 1) * Math.exp(-t * 50);
-      }
-      const src  = ac.createBufferSource();
-      src.buffer = buf;
+      const osc  = ac.createOscillator();
       const gain = ac.createGain();
-      gain.gain.setValueAtTime(0.4, ac.currentTime);
-      src.connect(gain);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ac.currentTime);
+      gain.gain.setValueAtTime(0.15, ac.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.08);
+      osc.connect(gain);
       gain.connect(ac.destination);
-      src.start();
-      src.onended = () => { try { ac.close(); } catch (_) {} };
+      osc.start();
+      osc.stop(ac.currentTime + 0.08);
     } catch (_) {}
   }
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('button, .char-card')) playClickSound();
+  });
 
   downloadBtn.addEventListener('click', () => {
     const link = document.createElement('a');
@@ -494,48 +505,6 @@
     banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#FEF3C7;color:#92400E;padding:10px 16px;font-size:.9rem;font-weight:700;z-index:1000;text-align:center;';
     banner.textContent = msg;
     document.body.prepend(banner);
-  }
-
-  // Celebration — simple confetti burst using CSS canvas
-  function fireCelebration() {
-    const cel = $('celebration');
-    if (!cel) return;
-    cel.classList.add('active');
-    const c = document.createElement('canvas');
-    c.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
-    c.width  = window.innerWidth;
-    c.height = window.innerHeight;
-    cel.innerHTML = '';
-    cel.appendChild(c);
-
-    const ctx = c.getContext('2d');
-    const particles = Array.from({ length: 80 }, () => ({
-      x:  Math.random() * c.width,
-      y:  -20 - Math.random() * 100,
-      vx: (Math.random() - 0.5) * 4,
-      vy: 2 + Math.random() * 4,
-      color: `hsl(${Math.random() * 360},80%,60%)`,
-      size: 6 + Math.random() * 8,
-      rot: Math.random() * Math.PI * 2,
-      rv:  (Math.random() - 0.5) * 0.2,
-    }));
-
-    let frame = 0;
-    function tick() {
-      ctx.clearRect(0, 0, c.width, c.height);
-      particles.forEach(p => {
-        p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.rot += p.rv;
-        ctx.save();
-        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
-        ctx.restore();
-      });
-      frame++;
-      if (frame < 200) requestAnimationFrame(tick);
-      else { cel.classList.remove('active'); cel.innerHTML = ''; }
-    }
-    requestAnimationFrame(tick);
   }
 
 })();

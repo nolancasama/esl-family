@@ -128,22 +128,32 @@ html, body {
 /* ── ═══════════════════════════════════════════════════════════════
    PHASE 1 — CHOOSE
    ══════════════════════════════════════════════════════════════════ */
-#choose-counter {
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--blue);
+.choose-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
   padding: 12px 0 4px;
 }
+.progress-seg {
+  width: 32px;
+  height: 8px;
+  border-radius: 99px;
+  background: #CBD5E1;
+  transition: background .2s, transform .2s;
+}
+.progress-seg.done   { background: var(--teal); }
+.progress-seg.active { background: var(--blue); transform: scaleY(1.4); }
 
 .char-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
   margin: 12px 0;
 }
 
 .char-card {
+  width: 130px;
   background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -212,7 +222,7 @@ html, body {
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: #1A1C2A;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -221,26 +231,36 @@ html, body {
 #assign-char-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: 50% 15%;
   display: block;
   pointer-events: none;
   user-select: none;
 }
 
-/* Top overlay: "Who is this?" */
+/* Top overlay: instruction + target sentence */
 #assign-prompt {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   text-align: center;
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #fff;
   padding: 14px 16px 28px;
   background: linear-gradient(to bottom, rgba(0,0,0,.72) 0%, rgba(0,0,0,0) 100%);
   z-index: 10;
   pointer-events: none;
+}
+#assign-instruction {
+  font-size: .9rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.85);
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+  margin-bottom: 2px;
+}
+#assign-sentence {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
   text-shadow: 0 2px 8px rgba(0,0,0,.5);
 }
 
@@ -361,74 +381,6 @@ html, body {
 #feedback-msg.error   { background: rgba(239,68,68,.22);  color: #FCA5A5; }
 #feedback-msg.info    { background: rgba(249,115,22,.22); color: #FDBA74; }
 
-/* ── Right panel: role board (vertical full-height) ──────────────── */
-#assign-board {
-  width: 90px;
-  flex-shrink: 0;
-  background: #0F172A;
-  border-left: 1px solid rgba(255,255,255,.07);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.board-grid {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-}
-
-.board-slot {
-  flex: 1;
-  min-height: 0;
-  border-radius: 0;
-  border: none;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  background: #0F172A;
-  padding: 5px 4px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  transition: background .2s;
-}
-.board-slot:last-child { border-bottom: none; }
-.board-slot.filled     { background: #172554; }
-
-.board-slot .slot-role {
-  font-size: 8px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: rgba(255,255,255,.32);
-  line-height: 1.2;
-}
-.board-slot.filled .slot-role { color: #6EE7B7; }
-
-.board-slot canvas,
-.board-slot img {
-  width: 42px;
-  height: 58px;
-  object-fit: contain;
-}
-.board-slot .slot-name {
-  font-size: 7px;
-  font-weight: 700;
-  color: rgba(255,255,255,.55);
-  line-height: 1.2;
-}
-.board-slot .slot-empty-icon svg { opacity: .22; }
-
-/* Fly-in animation */
-@keyframes fly-in {
-  from { opacity: 0; transform: scale(.3) translateY(-30px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.board-slot.animate { animation: fly-in .4s cubic-bezier(.34,1.56,.64,1) forwards; }
-
 /* ── ═══════════════════════════════════════════════════════════════
    PHASE 3 — SELFIE
    ══════════════════════════════════════════════════════════════════ */
@@ -495,19 +447,6 @@ html, body {
   margin: 0 auto 12px;
 }
 
-#pres-role-label {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--blue);
-  text-transform: capitalize;
-}
-
-#pres-char-name {
-  font-size: 1rem;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
 @keyframes pop-in {
   0%   { opacity: 0; transform: scale(.6); }
   70%  { transform: scale(1.08); }
@@ -546,28 +485,6 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  /* fade-in driven by JS: opacity 0 → 1 */
-}
-
-/* ── Camera flash overlay ─────────────────────────────────────────── */
-@keyframes camera-flash {
-  0%   { opacity: 0; }
-  8%   { opacity: 1; }
-  45%  { opacity: 1; }
-  100% { opacity: 0; }
-}
-#flash-overlay {
-  position: fixed;
-  inset: 0;
-  background: #fff;
-  z-index: 9998;
-  pointer-events: none;
-  opacity: 0;
-  display: none;
-}
-#flash-overlay.flashing {
-  display: block;
-  animation: camera-flash 0.65s ease-out forwards;
 }
 
 #photo-actions {
@@ -582,26 +499,11 @@ html, body {
   z-index: 10;
 }
 
-/* ── Celebration overlay ──────────────────────────────────────────── */
-#celebration {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 999;
-  display: none;
-}
-#celebration.active { display: block; }
-
 /* ── Responsive ───────────────────────────────────────────────────── */
 @media (max-width: 540px) {
   .page-header h1 { font-size: 1.3rem; }
-  .char-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .char-grid { gap: 8px; }
+  .char-card { width: 100px; }
   .char-card canvas, .char-card img { width: 80px; height: 112px; }
-  /* assign-layout stays row on small screens — sidebar just gets narrower */
-  #assign-board { width: 76px; }
   .btn-lg { padding: 16px 28px; font-size: 1.1rem; }
-}
-
-@media (max-width: 360px) {
-  .char-grid { grid-template-columns: repeat(2, 1fr); }
 }

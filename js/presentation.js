@@ -13,15 +13,11 @@ const Presentation = (() => {
   let _onDone      = null;
 
   let _charImgEl   = null;
-  let _roleLabelEl = null;
-  let _charNameEl  = null;
   let _progressEl  = null;
   let _frameEl     = null;
 
   function init(els) {
     _charImgEl   = els.charImg;
-    _roleLabelEl = els.roleLabel;
-    _charNameEl  = els.charName;
     _progressEl  = els.progress;
     _frameEl     = els.frame;
   }
@@ -51,9 +47,7 @@ const Presentation = (() => {
     // Update UI
     _charImgEl.src = Characters.imgUrl(char);
     _charImgEl.alt = char.name;
-    _roleLabelEl.textContent = 'This is my ' + role + '.';
-    _charNameEl.textContent  = char.name;
-    _progressEl.textContent  = `${_index + 1} / ${orderedRoles.length}`;
+    _progressEl.textContent = `${_index + 1} / ${orderedRoles.length}`;
 
     // Pop-in animation
     _frameEl.classList.remove('pop');

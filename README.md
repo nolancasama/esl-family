@@ -22,8 +22,8 @@ Open in **Chrome** (required for Web Speech API). Navigate to `http://localhost:
 
 ## How to play
 
-1. **Choose** — pick one family member at a time, in order: Grandfather, Father, Brother, Grandmother, Mother, Sister. Each step shows a pool of 6 candidates; tap one to lock it in. "New Characters" rerolls the current pool once per role.
-2. **Speak** — the 6 chosen characters appear one at a time, in the same order. Say the sentence for that specific person — e.g. "This is my father." — to confirm.
+1. **Choose** — pick one family member at a time, in order: Grandfather, Father, Brother, Grandmother, Mother, Sister. Each step shows 3 candidates at a time; tap one to lock it in. "New Characters" pages through more options.
+2. **Speak** — the 6 chosen characters appear one at a time, in the same order, with the target sentence shown on screen (e.g. "This is my father."). Say it aloud to confirm.
 3. **Selfie** — take a photo for the family portrait.
 4. **Replay** — hear your own English played back for each family member.
 5. **Photo** — receive the composited family portrait. Download or play again.
@@ -69,7 +69,6 @@ esl-family/
     characters.js    — manifest + placeholder generator + session pool
     speech.js        — Web Speech API wrapper + role parsing
     recorder.js      — MediaRecorder audio capture
-    board.js         — family board render + fly-in animation
     selfie.js        — camera capture
     presentation.js  — auto-replay phase
     photo.js         — canvas family portrait compositor
@@ -99,3 +98,8 @@ The app has no backend. Deploy the `esl-family/` folder to any static host:
 - **Netlify**: drag-and-drop `esl-family/` into Netlify dashboard
 - **GitHub Pages**: push to a repo, enable Pages on `main`
 - Must be served over **HTTPS** in production (required for mic/camera APIs)
+
+## Third-party assets
+
+- `assets/frames/` — picture frame art from the [Portrait Frame Pack](https://opengameart.org/content/portrait-frame-pack) by Screaming Brain Studios (CC0, no attribution required).
+- `assets/wallpaper.png` — ["Gray Floral"](https://www.toptal.com/designers/subtlepatterns/gray-floral/) pattern by Lauren, via Toptal Subtle Patterns (CC BY — attribution required, commercial use permitted).
