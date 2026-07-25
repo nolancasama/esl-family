@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>My Family — ESL Speaking Activity</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Loading screen (shown while DiceBear images fetch) -->
+<div id="loading-screen">
+  <div id="loading-content">
+    <div id="loading-title">Loading characters…</div>
+    <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
+    <div id="loading-count">0 / 100</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PHASE 1 — CHOOSE YOUR FAMILY
+═══════════════════════════════════════════════════════════════════ -->
+<div id="phase-choose" class="phase">
+  <div class="page-header">
+    <h1>Choose Your Family</h1>
+    <p id="choose-subtitle">Choose 3 male characters</p>
+  </div>
+  <div class="page-body">
+    <div id="choose-counter">0 / 3 selected</div>
+    <div id="char-grid" class="char-grid"></div>
+    <div class="choose-actions">
+      <button id="reroll-btn" class="btn btn-ghost btn-sm" aria-label="New Characters" title="New Characters">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 4v6h-6"/>
+          <path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+      <button id="start-btn" class="btn btn-primary btn-lg" disabled>Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PHASE 2 — ASSIGN ROLES BY SPEAKING
+═══════════════════════════════════════════════════════════════════ -->
+<div id="phase-assign" class="phase">
+  <div id="assign-layout">
+
+    <!-- Picture area: character fills the screen, overlaid controls -->
+    <div id="assign-picture-area">
+
+      <!-- Top overlay: prompt -->
+      <div id="assign-prompt">Who is this?</div>
+
+      <!-- Character image -->
+      <img id="assign-char-img" src="" alt="character">
+
+      <!-- Feedback + transcript overlaid above mic -->
+      <div id="feedback-msg" class="feedback-msg"></div>
+      <div id="transcript-box"></div>
+
+      <!-- Bottom-left overlay: undo -->
+      <button id="undo-btn" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 14L4 9l5-5"/>
+          <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>
+        </svg>
+        Undo
+      </button>
+
+      <!-- Bottom-center overlay: mic label + mic -->
+      <div id="mic-label">Tap to speak</div>
+      <button id="mic-btn" aria-label="Tap to speak">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm7 9a1 1 0 0 1 1 1 8 8 0 0 1-7 7.94V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-2.06A8 8 0 0 1 4 11a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- Right: role board panel (vertical, full height) -->
+    <div id="assign-board">
+      <div id="board-grid" class="board-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PHASE 3 — SELFIE
+═══════════════════════════════════════════════════════════════════ -->
+<div id="phase-selfie" class="phase">
+  <div class="page-header">
+    <h1>📷 Family Photo Time!</h1>
+    <p>Let's take a selfie for the family photo!</p>
+  </div>
+  <div id="selfie-wrap">
+    <video id="selfie-video" autoplay playsinline muted></video>
+    <img id="selfie-preview" src="" alt="Your selfie" style="display:none;">
+    <div id="selfie-feedback" style="display:none;background:#FEE2E2;color:#991B1B;border-radius:12px;padding:12px 16px;font-weight:700;font-size:.95rem;text-align:center;max-width:400px;width:100%;"></div>
+    <div id="selfie-actions">
+      <button id="snap-btn"      class="btn btn-success btn-lg" disabled>📸 Take Photo</button>
+      <button id="retake-btn"    class="btn btn-ghost"          disabled>Retake</button>
+      <button id="selfie-next-btn" class="btn btn-primary btn-lg" disabled>Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PHASE 4 — AUTO-PRESENTATION
+═══════════════════════════════════════════════════════════════════ -->
+<div id="phase-presentation" class="phase">
+  <div class="page-header">
+    <h1>Meet My Family!</h1>
+    <p>Listen to your English!</p>
+  </div>
+  <div id="pres-wrap">
+    <div id="pres-char-frame">
+      <img id="pres-char-img" src="" alt="family member" width="160" height="224">
+      <div id="pres-role-label"></div>
+      <div id="pres-char-name"></div>
+    </div>
+    <div id="pres-progress"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PHASE 5 — FAMILY PHOTO
+═══════════════════════════════════════════════════════════════════ -->
+<div id="phase-photo" class="phase">
+  <div id="photo-wrap">
+    <canvas id="family-photo-canvas"></canvas>
+    <div id="photo-actions">
+      <button id="download-btn"   class="btn btn-success">⬇ Save Photo</button>
+      <button id="play-again-btn" class="btn btn-primary">Play Again!</button>
+    </div>
+  </div>
+</div>
+
+<!-- Celebration overlay -->
+<div id="celebration"></div>
+
+<!-- Camera flash overlay -->
+<div id="flash-overlay"></div>
+
+<!-- Scripts — load order matters (dependencies first) -->
+<script src="js/characters.js"></script>
+<script src="js/speech.js"></script>
+<script src="js/recorder.js"></script>
+<script src="js/board.js"></script>
+<script src="js/selfie.js"></script>
+<script src="js/presentation.js"></script>
+<script src="js/photo.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
