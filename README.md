@@ -22,8 +22,8 @@ Open in **Chrome** (required for Web Speech API). Navigate to `http://localhost:
 
 ## How to play
 
-1. **Choose** — tap 6 characters from the pool of 12. Tap "New Characters" once to reroll.
-2. **Speak** — each character appears one at a time. Say "This is my mother." etc. to assign a role.
+1. **Choose** — pick one family member at a time, in order: Grandfather, Father, Brother, Grandmother, Mother, Sister. Each step shows a pool of 6 candidates; tap one to lock it in. "New Characters" rerolls the current pool once per role.
+2. **Speak** — the 6 chosen characters appear one at a time, in the same order. Say the sentence for that specific person — e.g. "This is my father." — to confirm.
 3. **Selfie** — take a photo for the family portrait.
 4. **Replay** — hear your own English played back for each family member.
 5. **Photo** — receive the composited family portrait. Download or play again.
@@ -48,9 +48,9 @@ Every character has a consistent full-body, front-facing design with transparent
    - Names: `g01.png` … `g50.png` (generic), `i01.png` … `i50.png` (imaginative)
    - 1024 × 1024 px, transparent background, full body, centered, no text/watermark
 2. Place files in `assets/characters/`
-3. In `assets/characters.json`, set each `"img"` field:
+3. In `assets/characters.json`, set each `"img"` field (path is relative to `index.html`, so it needs the `assets/` prefix):
    ```json
-   { "id": "g01", "name": "Adult Woman", "category": "generic", "img": "characters/g01.png" }
+   { "id": "g01", "name": "Adult Woman", "category": "generic", "img": "assets/characters/g01.png" }
    ```
 4. When `"img"` is set, the app uses your file instead of the generated placeholder.
 

@@ -7,18 +7,21 @@
 
 (async function () {
 
+  // Order family members are picked in, one at a time.
+  const SELECT_ORDER = ['grandfather', 'father', 'brother', 'grandmother', 'mother', 'sister'];
+
+  // Real-art characters — shown only in the "Choose your Brother" step, never elsewhere.
+  const BROTHER_CHAR_IDS = ['g06', 'g08', 'g14', 'g27', 'i02', 'i14', 'i27', 'i41', 'i49'];
+
   // ── State ─────────────────────────────────────────────────────────
   const state = {
-    pool:           [],   // 6 characters currently shown in choose phase
+    pool:           [],   // candidates currently shown for the role being picked
     rerollUsed:     false,
-    chooseStep:     1,    // 1 = pick males, 2 = pick females
-    selectedMale:   [],   // 3 chosen male chars
-    selectedFemale: [],   // 3 chosen female chars
-    selected:       [],   // combined 6 (set when entering assign)
-    assignIndex:    0,    // index into selected[] currently being assigned
+    roleIndex:      0,    // index into SELECT_ORDER for the choose phase
+    pickedIds:      new Set(), // char ids already used by an earlier role
+    selected:       [],   // 6 chars, in SELECT_ORDER order (set as choose phase proceeds)
+    assignIndex:    0,    // index into selected[] / SELECT_ORDER currently being assigned
     assignments:    {},   // { role: { char, audioBlob, transcript } }
-    availableRoles: [...Board.ROLES],
-    undoStack:      [],   // [{ role, char, audioBlob, transcript }]
     selfieDataURL:  null,
     micOpen:        false,
   };
@@ -40,7 +43,6 @@
   const chooseCounter  = $('choose-counter');
   const chooseSubtitle = $('choose-subtitle');
   const rerollBtn      = $('reroll-btn');
-  const startBtn       = $('start-btn');
 
   // Assign phase
   const assignCharImg  = $('assign-char-img');
@@ -99,106 +101,99 @@
   enterChoosePhase();
 
   // ── ═══════════════════════════════════════════════════════════════
-  //   PHASE 1 — CHOOSE  (step 1: pick 3 males · step 2: pick 3 females)
+  //   PHASE 1 — CHOOSE  (one family member at a time, in SELECT_ORDER)
   // ══════════════════════════════════════════════════════════════════
   function enterChoosePhase() {
-    state.chooseStep    = 1;
-    state.selectedMale  = [];
-    state.selectedFemale= [];
-    state.selected      = [];
-    state.rerollUsed    = false;
-    state.assignments   = {};
-    state.availableRoles= [...Board.ROLES];
-    state.undoStack     = [];
-    state.selfieDataURL = null;
-    state.assignIndex   = 0;
+    state.roleIndex      = 0;
+    state.pickedIds       = new Set();
+    state.selected        = [];
+    state.rerollUsed      = false;
+    state.assignments     = {};
+    state.selfieDataURL   = null;
+    state.assignIndex     = 0;
 
     showPhase('choose');
     loadChooseStep();
   }
 
   function loadChooseStep() {
-    const isMale = state.chooseStep === 1;
-    state.pool       = Characters.buildGenderedPool(isMale ? 'male' : 'female', 6);
+    const role   = SELECT_ORDER[state.roleIndex];
+    const gender = Speech.ROLE_GENDER[role];
+
+    state.pool       = buildPoolForRole(role, gender);
     state.rerollUsed = false;
 
-    chooseSubtitle.textContent = isMale ? 'Choose 3 male characters' : 'Choose 3 female characters';
-    startBtn.textContent       = "Let's Go! →";
-    startBtn.style.display     = isMale ? 'none' : '';
+    chooseSubtitle.textContent = `Choose your ${capitalize(role)}`;
+    chooseCounter.textContent  = `${state.roleIndex + 1} / ${SELECT_ORDER.length}`;
 
     renderPool();
     updateChooseUI();
   }
 
+  function buildPoolForRole(role, gender) {
+    if (role === 'brother') {
+      return Characters.shuffle(
+        Characters.getAll().filter(c => BROTHER_CHAR_IDS.includes(c.id) && !state.pickedIds.has(c.id))
+      );
+    }
+    const exclude = new Set([...state.pickedIds, ...BROTHER_CHAR_IDS]);
+    return Characters.buildGenderedPool(gender, 6, exclude);
+  }
+
   function renderPool() {
     charGrid.innerHTML = '';
-    const currentSelection = state.chooseStep === 1 ? state.selectedMale : state.selectedFemale;
     state.pool.forEach(char => {
       const card = document.createElement('div');
       card.className = 'char-card';
       card.dataset.id = char.id;
-      if (currentSelection.some(c => c.id === char.id)) card.classList.add('selected');
 
       const imgEl = new Image();
       imgEl.src = Characters.imgUrl(char);
       imgEl.alt = char.name;
       card.appendChild(imgEl);
 
-      const nameEl = document.createElement('div');
-      nameEl.className = 'char-name';
-      nameEl.textContent = char.name;
-      card.appendChild(nameEl);
-
-      card.addEventListener('click', () => toggleSelect(char, card));
+      card.addEventListener('click', () => pickCharacter(char, card));
       charGrid.appendChild(card);
     });
   }
 
-  function toggleSelect(char, cardEl) {
-    const sel = state.chooseStep === 1 ? state.selectedMale : state.selectedFemale;
-    const idx = sel.findIndex(c => c.id === char.id);
-    if (idx >= 0) {
-      sel.splice(idx, 1);
-      cardEl.classList.remove('selected');
-    } else if (sel.length < 3) {
-      sel.push(char);
-      cardEl.classList.add('selected');
-    }
-    updateChooseUI();
+  function pickCharacter(char, cardEl) {
+    const role = SELECT_ORDER[state.roleIndex];
+    cardEl.classList.add('selected');
+    state.pickedIds.add(char.id);
+    state.selected.push(char);
 
-    // Auto-advance from male step when 3 are selected
-    if (state.chooseStep === 1 && state.selectedMale.length === 3) {
-      setTimeout(() => {
-        state.chooseStep = 2;
+    // Briefly show the pick, then advance to the next role (or finish).
+    setTimeout(() => {
+      state.roleIndex++;
+      if (state.roleIndex < SELECT_ORDER.length) {
         loadChooseStep();
-      }, 300);
-    }
+      } else {
+        enterAssignPhase();
+      }
+    }, 300);
   }
 
   function updateChooseUI() {
-    const sel = state.chooseStep === 1 ? state.selectedMale : state.selectedFemale;
-    chooseCounter.textContent = `${sel.length} / 3 selected`;
-    startBtn.disabled  = sel.length !== 3;
+    const role = SELECT_ORDER[state.roleIndex];
+    // Brother step already shows every real-art candidate — nothing to reroll.
+    rerollBtn.style.display = role === 'brother' ? 'none' : '';
     rerollBtn.disabled = state.rerollUsed;
   }
 
   rerollBtn.addEventListener('click', () => {
     if (state.rerollUsed) return;
     state.rerollUsed = true;
-    if (state.chooseStep === 1) state.selectedMale   = [];
-    else                        state.selectedFemale = [];
-    state.pool = Characters.buildGenderedPool(
-      state.chooseStep === 1 ? 'male' : 'female', 6
-    );
+    const role   = SELECT_ORDER[state.roleIndex];
+    const gender = Speech.ROLE_GENDER[role];
+    state.pool = buildPoolForRole(role, gender);
     renderPool();
     updateChooseUI();
   });
 
-  startBtn.addEventListener('click', () => {
-    if (state.selectedFemale.length !== 3) return;
-    state.selected = [...state.selectedMale, ...state.selectedFemale];
-    enterAssignPhase();
-  });
+  function capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
 
   // ── ═══════════════════════════════════════════════════════════════
   //   PHASE 2 — ASSIGN
@@ -279,13 +274,16 @@
       transcriptBox.classList.add('visible');
     }
 
+    const targetRole = SELECT_ORDER[state.assignIndex];
+    const capTarget   = capitalize(targetRole);
+
     if (!role) {
       if (genderMismatch) {
-        const cap     = genderMismatch.charAt(0).toUpperCase() + genderMismatch.slice(1);
+        const cap     = capitalize(genderMismatch);
         const pronoun = Speech.ROLE_GENDER[genderMismatch] === 'male' ? 'He' : 'She';
         showFeedback(`Almost! Use "${pronoun} is my ${cap}." or "This is my ${cap}."`, 'info');
       } else if (roleHint) {
-        const cap = roleHint.charAt(0).toUpperCase() + roleHint.slice(1);
+        const cap = capitalize(roleHint);
         showFeedback(`Good try! Say the full sentence: "This is my ${cap}."`, 'info');
       } else {
         showFeedback("Sorry, I didn't catch that. Can you say that again?", 'error');
@@ -293,9 +291,8 @@
       return;
     }
 
-    if (!state.availableRoles.includes(role)) {
-      const capRole = role.charAt(0).toUpperCase() + role.slice(1);
-      showFeedback(`You already have a ${capRole}! Try a different family member.`, 'info');
+    if (role !== targetRole) {
+      showFeedback(`Not quite! This one is your ${capTarget}. Try: "This is my ${capTarget}."`, 'info');
       return;
     }
 
@@ -308,16 +305,12 @@
       try { audioBlob = await Recorder.stopSegment(); } catch (_) {}
     }
 
-    const assignment = { char, audioBlob, transcript };
-    state.assignments[role] = assignment;
-    state.undoStack.push({ role, ...assignment });
-    state.availableRoles = state.availableRoles.filter(r => r !== role);
+    state.assignments[targetRole] = { char, audioBlob, transcript };
 
     // Update board with fly-in
-    Board.assign(role, char);
+    Board.assign(targetRole, char);
 
-    const capRole = role.charAt(0).toUpperCase() + role.slice(1);
-    showFeedback(`${capRole}! ✓`, 'success');
+    showFeedback(`${capTarget}! ✓`, 'success');
 
     state.assignIndex++;
 
@@ -331,16 +324,13 @@
 
   // Undo
   undoBtn.addEventListener('click', () => {
-    if (state.undoStack.length === 0) return;
+    if (state.assignIndex === 0) return;
 
-    const last = state.undoStack.pop();
-    delete state.assignments[last.role];
-    state.availableRoles.push(last.role);
+    state.assignIndex--;
+    const role = SELECT_ORDER[state.assignIndex];
+    delete state.assignments[role];
 
-    Board.unassign(last.role);
-
-    // Go back one character
-    if (state.assignIndex > 0) state.assignIndex--;
+    Board.unassign(role);
 
     // Re-start segment for this character
     if (state.micOpen) {
@@ -353,7 +343,7 @@
   });
 
   function updateUndoBtn() {
-    undoBtn.disabled = state.undoStack.length === 0;
+    undoBtn.disabled = state.assignIndex === 0;
   }
 
   // ── ═══════════════════════════════════════════════════════════════

@@ -545,8 +545,10 @@ const Characters = (() => {
     return char._dataUrl || char.img || char._placeholder;
   }
 
-  function buildGenderedPool(gender, count) {
-    return shuffle(_all.filter(c => c.gender === gender)).slice(0, count);
+  function buildGenderedPool(gender, count, excludeIds) {
+    const exclude = excludeIds ? new Set(excludeIds) : null;
+    const pool = _all.filter(c => c.gender === gender && !(exclude && exclude.has(c.id)));
+    return shuffle(pool).slice(0, count);
   }
 
   function buildPool() {
@@ -564,5 +566,5 @@ const Characters = (() => {
     return a;
   }
 
-  return { load, getAll, imgUrl, buildPool, buildGenderedPool };
+  return { load, getAll, imgUrl, buildPool, buildGenderedPool, shuffle };
 })();
