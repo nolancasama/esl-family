@@ -14,11 +14,12 @@
   const ROLE_CHAR_IDS = {
     brother:     ['g06', 'g08', 'g14', 'g27', 'i02', 'i14', 'i27', 'i41', 'i49'],
     grandfather: ['g04', 'g19', 'g34', 'g40', 'g42', 'g47', 'g48', 'i01', 'i03', 'i36'],
+    sister:      ['g05', 'g07', 'g13', 'g18', 'g31', 'g41', 'i18', 'i22', 'i50'],
   };
   const ALL_SCOPED_CHAR_IDS = Object.values(ROLE_CHAR_IDS).flat();
 
   // How many candidates are shown per choose-phase screen.
-  const POOL_SIZE = 3;
+  const POOL_SIZE = 4;
 
   // ── State ─────────────────────────────────────────────────────────
   const state = {
