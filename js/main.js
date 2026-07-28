@@ -15,6 +15,8 @@
     brother:     ['g06', 'g08', 'g14', 'g27', 'i02', 'i14', 'i27', 'i41', 'i49'],
     grandfather: ['g04', 'g19', 'g34', 'g40', 'g42', 'g47', 'g48', 'i01', 'i03', 'i36'],
     sister:      ['g05', 'g07', 'g13', 'g18', 'g31', 'g41', 'i18', 'i22', 'i50'],
+    father:      ['g02', 'g15', 'g20', 'g33', 'g39', 'g43', 'i05', 'i21', 'i40', 'i47'],
+    mother:      ['g21', 'g24', 'g28', 'g37', 'g38', 'g46', 'i13', 'i23', 'i37', 'i48'],
   };
   const ALL_SCOPED_CHAR_IDS = Object.values(ROLE_CHAR_IDS).flat();
 
