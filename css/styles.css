@@ -488,9 +488,9 @@ html, body {
   pointer-events: none;
 }
 #feedback-msg:empty { display: none; }
-#feedback-msg.success { background: rgba(34,197,94,.22);  color: #86EFAC; }
-#feedback-msg.error   { background: rgba(239,68,68,.22);  color: #FCA5A5; }
-#feedback-msg.info    { background: rgba(249,115,22,.22); color: #FDBA74; }
+#feedback-msg.success { background: #16A34A; color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+#feedback-msg.error   { background: #DC2626; color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+#feedback-msg.info    { background: #EA580C; color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
 
 /* ── ═══════════════════════════════════════════════════════════════
    PHASE 3 — SELFIE
