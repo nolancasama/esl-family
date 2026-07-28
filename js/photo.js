@@ -24,6 +24,7 @@ const Photo = (() => {
   const ROW_GAP       = 34;
   const COL_GAP       = 22;
   const TOP_MARGIN    = 30;
+  const PORTRAIT_INSET = 0.08; // padding between portrait and frame's inner edge, as a fraction of the hole size
 
   // Each relation gets its own rectangular frame size — a gallery wall
   // of mismatched frames, not a uniform grid.
@@ -139,7 +140,10 @@ const Photo = (() => {
     ctx.clip();
     ctx.fillStyle = '#fff';
     ctx.fillRect(holeX, holeY, holeW, holeH);
-    drawCover(ctx, portraitImg, holeX, holeY, holeW, holeH, biasY);
+    // Inset the portrait within the hole so a bit of matting shows
+    // between the picture and the frame's inner edge.
+    const padX = holeW * PORTRAIT_INSET, padY = holeH * PORTRAIT_INSET;
+    drawCover(ctx, portraitImg, holeX + padX, holeY + padY, holeW - padX * 2, holeH - padY * 2, biasY);
     ctx.restore();
 
     // Frame art on top (transparent hole reveals the portrait), stretched
@@ -157,7 +161,19 @@ const Photo = (() => {
     ctx.fillStyle = '#4A3620';
     ctx.font = 'bold 15px "Segoe UI", Arial, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(label, x + w / 2, plateY + NAMEPLATE_H / 2 + 1);
+    const fitted = fitText(ctx, label, w - 16);
+    ctx.fillText(fitted, x + w / 2, plateY + NAMEPLATE_H / 2 + 1);
+  }
+
+  // Truncate with an ellipsis if the label is wider than the nameplate
+  // (arbitrary player-entered names can run longer than role words).
+  function fitText(ctx, text, maxWidth) {
+    if (ctx.measureText(text).width <= maxWidth) return text;
+    let s = text;
+    while (s.length > 1 && ctx.measureText(s + '…').width > maxWidth) {
+      s = s.slice(0, -1);
+    }
+    return s + '…';
   }
 
   /* ── Pop-in reveal animation ───────────────────────────────────────── */
@@ -198,10 +214,15 @@ const Photo = (() => {
   }
 
   /* ── Main compose ────────────────────────────────────────────────── */
-  async function compose(canvasEl, assignments, selfieDataURL) {
-    canvasEl.width  = CW;
-    canvasEl.height = CH;
+  async function compose(canvasEl, assignments, selfieDataURL, playerName) {
+    // Render at a higher pixel density than the CSS display size (which can
+    // be much larger than CW/CH on a wide screen) so the canvas isn't
+    // blurrily upscaled by the browser.
+    const scale = Math.max(window.devicePixelRatio || 1, 2);
+    canvasEl.width  = CW * scale;
+    canvasEl.height = CH * scale;
     const ctx = canvasEl.getContext('2d');
+    ctx.scale(scale, scale);
 
     const orderedRoles = ROLE_ORDER.filter(r => assignments[r]);
     // Back row: parents + grandparents. Front row: siblings + student (centred).
@@ -243,7 +264,7 @@ const Photo = (() => {
       cards.push({
         key: k, x: pos.x, y, w: pos.w, h: pos.h,
         img: frontImgs[i], frameInfo: FRAME_INFO[k], frameImg: frameImgs[k],
-        label: k === 'me' ? 'Me' : capitalize(k), biasY: k === 'me' ? 0.3 : 0.15,
+        label: k === 'me' ? (playerName || 'Me') : capitalize(k), biasY: k === 'me' ? 0.3 : 0.15,
       });
     });
 

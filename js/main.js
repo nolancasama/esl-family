@@ -17,11 +17,12 @@
     sister:      ['g05', 'g07', 'g13', 'g18', 'g31', 'g41', 'i18', 'i22', 'i50'],
     father:      ['g02', 'g15', 'g20', 'g33', 'g39', 'g43', 'i05', 'i21', 'i40', 'i47'],
     mother:      ['g21', 'g24', 'g28', 'g37', 'g38', 'g46', 'i13', 'i23', 'i37', 'i48'],
+    grandmother: ['g03', 'g30', 'g32', 'g36', 'g45', 'g49', 'i28', 'i35', 'i44', 'i46'],
   };
   const ALL_SCOPED_CHAR_IDS = Object.values(ROLE_CHAR_IDS).flat();
 
   // How many candidates are shown per choose-phase screen.
-  const POOL_SIZE = 4;
+  const POOL_SIZE = 3;
 
   // ── State ─────────────────────────────────────────────────────────
   const state = {
@@ -36,6 +37,7 @@
     assignments:    {},   // { role: { char, audioBlob, transcript } }
     selfieDataURL:  null,
     micOpen:        false,
+    playerName:     '',
   };
 
   // ── DOM refs ───────────────────────────────────────────────────────
@@ -43,12 +45,23 @@
 
   // Phase containers
   const phases = {
+    intro:        $('phase-intro'),
     choose:       $('phase-choose'),
     assign:       $('phase-assign'),
     selfie:       $('phase-selfie'),
     presentation: $('phase-presentation'),
     photo:        $('phase-photo'),
   };
+
+  // Intro phase
+  const introSkipBtn   = $('intro-skip-btn');
+  const introTapZone   = $('intro-tap-zone');
+  const introLine      = $('intro-line');
+  const introHint      = $('intro-hint');
+  const introYesBtn    = $('intro-yes-btn');
+  const introInputWrap = $('intro-input-wrap');
+  const introNameInput = $('intro-name-input');
+  const introNextBtn   = $('intro-next-btn');
 
   // Choose phase
   const charGrid       = $('char-grid');
@@ -100,11 +113,26 @@
     frame:    presFrame,
   });
 
+  Intro.init({
+    tapZone:   introTapZone,
+    lineEl:    introLine,
+    hint:      introHint,
+    yesBtn:    introYesBtn,
+    inputWrap: introInputWrap,
+    nameInput: introNameInput,
+    nextBtn:   introNextBtn,
+    skipBtn:   introSkipBtn,
+  });
+
   if (!Speech.isSupported()) {
-    showGlobalWarning('⚠️ Speech recognition is not supported. Please open this page in Google Chrome.');
+    showGlobalWarning('⚠️ おんせいにんしきが つかえません。Google Chromeで ひらいてください。');
   }
 
-  enterChoosePhase();
+  showPhase('intro');
+  Intro.start((name) => {
+    state.playerName = name;
+    fadeTransition(() => enterChoosePhase());
+  });
 
   // ── ═══════════════════════════════════════════════════════════════
   //   PHASE 1 — CHOOSE  (one family member at a time, in SELECT_ORDER)
@@ -231,7 +259,7 @@
         await Recorder.openStream();
         state.micOpen = true;
       } catch (e) {
-        showFeedback('Microphone not available. Recording disabled.', 'error');
+        showFeedback('マイクが つかえません。ろくおんは できません。', 'error');
       }
     }
 
@@ -273,13 +301,13 @@
   function startListening() {
     _listening = true;
     micBtn.classList.add('listening');
-    micLabel.textContent = 'Listening… tap to stop';
+    micLabel.textContent = 'きいています…タップで ストップ';
     clearFeedback();
     transcriptBox.classList.remove('visible');
 
     Speech.start(
-      (result) => { _listening = false; micBtn.classList.remove('listening'); micLabel.textContent = 'Tap to speak'; handleSpeechResult(result); },
-      (errMsg) => { _listening = false; micBtn.classList.remove('listening'); micLabel.textContent = 'Tap to speak'; showFeedback(errMsg, 'error'); },
+      (result) => { _listening = false; micBtn.classList.remove('listening'); micLabel.textContent = 'タップして はなそう'; handleSpeechResult(result); },
+      (errMsg) => { _listening = false; micBtn.classList.remove('listening'); micLabel.textContent = 'タップして はなそう'; showFeedback(errMsg, 'error'); },
       () => { if (state.micOpen) Recorder.markSpeechStart(); }
     );
   }
@@ -287,7 +315,7 @@
   function stopListening() {
     _listening = false;
     micBtn.classList.remove('listening');
-    micLabel.textContent = 'Tap to speak';
+    micLabel.textContent = 'タップして はなそう';
     Speech.stop();
   }
 
@@ -305,18 +333,18 @@
       if (genderMismatch) {
         const cap     = capitalize(genderMismatch);
         const pronoun = Speech.ROLE_GENDER[genderMismatch] === 'male' ? 'He' : 'She';
-        showFeedback(`Almost! Use "${pronoun} is my ${cap}." or "This is my ${cap}."`, 'info');
+        showFeedback(`おしい！「${pronoun} is my ${cap}.」か「This is my ${cap}.」と言ってみて`, 'info');
       } else if (roleHint) {
         const cap = capitalize(roleHint);
-        showFeedback(`Good try! Say the full sentence: "This is my ${cap}."`, 'info');
+        showFeedback(`いいちょうせん！ぶんぜんたいを 言ってみよう：「This is my ${cap}.」`, 'info');
       } else {
-        showFeedback("Sorry, I didn't catch that. Can you say that again?", 'error');
+        showFeedback("ごめんね、聞き取れなかったよ。もう一度言ってみて？", 'error');
       }
       return;
     }
 
     if (role !== targetRole) {
-      showFeedback(`Not quite! This one is your ${capTarget}. Try: "This is my ${capTarget}."`, 'info');
+      showFeedback(`ちがうよ！これは あなたの${capTarget}だよ。「This is my ${capTarget}.」と言ってみて`, 'info');
       return;
     }
 
@@ -386,12 +414,12 @@
     } catch (e) {
       console.error('Camera error:', e);
       const msg = e && e.name === 'NotFoundError'
-        ? 'No camera found on this device. You can continue without a photo.'
+        ? 'カメラが 見つかりません。しゃしんなしで つづけられます。'
         : e && e.name === 'NotAllowedError'
-        ? 'Camera access was blocked. Check: Chrome address bar lock icon → Camera → Allow, then reload.'
+        ? 'カメラへの アクセスが ブロックされました。Chromeの アドレスバーの鍵アイコン→カメラ→許可 にして、ページを再読み込みしてください。'
         : e && e.name === 'NotReadableError'
-        ? 'Camera is in use by another app. Close it and reload.'
-        : `Camera error: ${e && e.message || e}. You can continue without a photo.`;
+        ? 'カメラが 他のアプリで 使用中です。閉じてから 再読み込みしてください。'
+        : `カメラエラー：${e && e.message || e}。しゃしんなしで つづけられます。`;
       selfieFeedback.textContent  = msg;
       selfieFeedback.style.display = 'block';
       snapBtn.disabled       = true;
@@ -402,10 +430,39 @@
 
   snapBtn.addEventListener('click', () => {
     Selfie.capture();
+    playCameraClick();
+    triggerFlash();
     retakeBtn.disabled    = false;
     selfieNextBtn.disabled = false;
     snapBtn.disabled       = true;
   });
+
+  function triggerFlash() {
+    const overlay = $('flash-overlay');
+    overlay.classList.remove('flashing');
+    void overlay.offsetWidth;  // force reflow so animation re-fires
+    overlay.classList.add('flashing');
+  }
+
+  function playCameraClick() {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.1), ac.sampleRate);
+      const d   = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) {
+        const t = i / ac.sampleRate;
+        d[i] = (Math.random() * 2 - 1) * Math.exp(-t * 50);
+      }
+      const src  = ac.createBufferSource();
+      src.buffer = buf;
+      const gain = ac.createGain();
+      gain.gain.setValueAtTime(0.4, ac.currentTime);
+      src.connect(gain);
+      gain.connect(ac.destination);
+      src.start();
+      src.onended = () => { try { ac.close(); } catch (_) {} };
+    } catch (_) {}
+  }
 
   retakeBtn.addEventListener('click', () => {
     Selfie.retake();
@@ -439,40 +496,8 @@
     photoCanvas.style.opacity = '1';
 
     // Frames pop in one at a time, the student's own photo last.
-    await Photo.compose(photoCanvas, state.assignments, state.selfieDataURL);
+    await Photo.compose(photoCanvas, state.assignments, state.selfieDataURL, state.playerName);
   }
-
-  // ── Shared audio context for UI sound effects ─────────────────────
-  let _audioCtx = null;
-  function getAudioContext() {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return null;
-    if (!_audioCtx) _audioCtx = new AC();
-    if (_audioCtx.state === 'suspended') _audioCtx.resume();
-    return _audioCtx;
-  }
-
-  // Short tap blip — plays on every button / character-card click
-  function playClickSound() {
-    const ac = getAudioContext();
-    if (!ac) return;
-    try {
-      const osc  = ac.createOscillator();
-      const gain = ac.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ac.currentTime);
-      gain.gain.setValueAtTime(0.15, ac.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.08);
-      osc.connect(gain);
-      gain.connect(ac.destination);
-      osc.start();
-      osc.stop(ac.currentTime + 0.08);
-    } catch (_) {}
-  }
-
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('button, .char-card')) playClickSound();
-  });
 
   downloadBtn.addEventListener('click', () => {
     const link = document.createElement('a');
@@ -491,6 +516,17 @@
   function showPhase(name) {
     Object.values(phases).forEach(el => el.classList.remove('active'));
     phases[name].classList.add('active');
+  }
+
+  // Fades to white, runs the phase switch while the screen is fully white,
+  // then fades back out — softens the cut between the intro and the game.
+  function fadeTransition(midCallback) {
+    const overlay = $('scene-fade');
+    overlay.classList.add('active');
+    setTimeout(() => {
+      midCallback();
+      requestAnimationFrame(() => overlay.classList.remove('active'));
+    }, 500);
   }
 
   function showFeedback(msg, type) {

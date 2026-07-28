@@ -85,6 +85,7 @@ html, body {
   text-align: center;
 }
 .page-header h1 { font-size: 1.6rem; font-weight: 800; }
+.icon-heading   { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .page-header p  { font-size: 1rem;   opacity: .9; margin-top: 4px; }
 
 .page-body {
@@ -107,6 +108,7 @@ html, body {
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
   transition: transform .1s, box-shadow .1s, opacity .2s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -124,6 +126,108 @@ html, body {
 .btn-danger   { background: var(--red);    color: #fff; }
 .btn-sm       { padding: 10px 20px; font-size: .95rem; }
 .btn-lg       { padding: 18px 36px; font-size: 1.25rem; }
+
+/* ── ═══════════════════════════════════════════════════════════════
+   PHASE 0 — INTRO (mysterious text opening)
+   ══════════════════════════════════════════════════════════════════ */
+#phase-intro.active {
+  align-items: center;
+  justify-content: center;
+  background: #0A0A14;
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+#intro-skip-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.6);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: .82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  z-index: 20;
+  transition: background .15s, color .15s;
+}
+#intro-skip-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
+
+#intro-tap-zone {
+  width: 100%;
+  max-width: 640px;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  cursor: pointer;
+}
+
+#intro-line {
+  color: #F4F1E8;
+  font-size: 1.6rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.9;
+  letter-spacing: .02em;
+  min-height: 3.8em;
+  white-space: pre-wrap;
+  opacity: 0;
+}
+#intro-line.fade-in { animation: intro-fade-in .7s ease forwards; }
+#intro-line.typing::after {
+  content: '▌';
+  margin-left: 3px;
+  animation: intro-blink 1s step-start infinite;
+}
+@keyframes intro-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes intro-blink   { 50% { opacity: 0; } }
+
+#intro-hint {
+  color: rgba(244,241,232,.45);
+  font-size: .8rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: .02em;
+  margin-top: -20px;
+}
+
+.intro-control { cursor: pointer; }
+
+#intro-input-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+#intro-name-input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 1.2rem;
+  font-family: inherit;
+  text-align: center;
+  border-radius: 50px;
+  border: 2px solid rgba(255,255,255,.3);
+  background: rgba(255,255,255,.07);
+  color: #fff;
+  outline: none;
+}
+#intro-name-input::placeholder { color: rgba(255,255,255,.4); }
+#intro-name-input:focus { border-color: var(--blue); }
+#intro-name-input.shake { animation: intro-shake .4s; }
+@keyframes intro-shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-8px); }
+  75%      { transform: translateX(8px); }
+}
 
 /* ── ═══════════════════════════════════════════════════════════════
    PHASE 1 — CHOOSE
@@ -146,14 +250,14 @@ html, body {
 
 .char-grid {
   display: grid;
-  grid-template-columns: repeat(2, 240px);
+  grid-template-columns: repeat(3, 288px);
   justify-content: center;
   gap: 12px;
   margin: 12px 0;
 }
 
 .char-card {
-  width: 240px;
+  width: 288px;
   background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -175,8 +279,8 @@ html, body {
 
 .char-card canvas,
 .char-card img {
-  width: 200px;
-  height: 280px;
+  width: 240px;
+  height: 336px;
   object-fit: contain;
   display: block;
   margin: 0 auto 6px;
@@ -419,10 +523,23 @@ html, body {
 }
 
 #selfie-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+}
+#selfie-actions #retake-btn      { justify-self: start; }
+#selfie-actions #selfie-next-btn { justify-self: end; }
+
+#snap-btn {
+  justify-self: center;
+  width: 84px;
+  height: 84px;
+  padding: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 /* ── ═══════════════════════════════════════════════════════════════
@@ -447,8 +564,8 @@ html, body {
 }
 
 #pres-char-img {
-  width: 160px;
-  height: 224px;
+  width: 240px;
+  height: 336px;
   object-fit: contain;
   display: block;
   margin: 0 auto 12px;
@@ -506,11 +623,44 @@ html, body {
   z-index: 10;
 }
 
+/* ── Camera flash overlay ─────────────────────────────────────────── */
+@keyframes camera-flash {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  45%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+#flash-overlay {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0;
+  display: none;
+}
+#flash-overlay.flashing {
+  display: block;
+  animation: camera-flash 0.65s ease-out forwards;
+}
+
+/* ── Scene transition (fade to white between the intro and the game) ── */
+#scene-fade {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+#scene-fade.active { opacity: 1; }
+
 /* ── Responsive ───────────────────────────────────────────────────── */
 @media (max-width: 540px) {
   .page-header h1 { font-size: 1.3rem; }
-  .char-grid { grid-template-columns: repeat(2, 100px); gap: 8px; }
-  .char-card { width: 100px; }
-  .char-card canvas, .char-card img { width: 80px; height: 112px; }
+  .char-grid { grid-template-columns: repeat(3, 90px); gap: 8px; }
+  .char-card { width: 90px; }
+  .char-card canvas, .char-card img { width: 72px; height: 100px; }
   .btn-lg { padding: 16px 28px; font-size: 1.1rem; }
 }

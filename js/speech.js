@@ -88,10 +88,10 @@ const Speech = (() => {
     recognition.onerror = (event) => {
       _active = false;
       const msg = event.error === 'no-speech'
-        ? "I didn't hear anything. Try again!"
+        ? "なにも きこえなかったよ。もういちど！"
         : event.error === 'not-allowed'
-        ? "Microphone blocked. Please allow mic access."
-        : "Sorry, I didn't catch that. Can you say that again?";
+        ? "マイクが ブロックされています。マイクへの アクセスを 許可してください。"
+        : "ごめんね、聞き取れなかったよ。もう一度言ってみて？";
       if (_onError) _onError(msg);
     };
 
@@ -99,7 +99,7 @@ const Speech = (() => {
       if (_active) {
         // Recognition ended without firing onresult (e.g. silence timeout)
         _active = false;
-        if (_onError) _onError("I didn't hear anything. Try again!");
+        if (_onError) _onError("なにも きこえなかったよ。もういちど！");
       }
     };
 
@@ -149,7 +149,7 @@ const Speech = (() => {
 
   function start(onResult, onError, onSpeechStart) {
     if (!recognition && !init()) {
-      if (onError) onError('Speech recognition is not supported in this browser. Please use Chrome.');
+      if (onError) onError('このブラウザは おんせいにんしきに たいおうしていません。Chromeを つかってください。');
       return;
     }
     _onResult      = onResult;
