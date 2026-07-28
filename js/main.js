@@ -499,6 +499,23 @@
     await Photo.compose(photoCanvas, state.assignments, state.selfieDataURL, state.playerName);
   }
 
+  // Tap a framed portrait on the final photo to hear that member's recording.
+  let _photoAudio = null;
+  photoCanvas.addEventListener('click', (e) => {
+    const key = Photo.getCardAt(photoCanvas, e.clientX, e.clientY);
+    if (!key) return;
+    Photo.pulseCard(photoCanvas, key);
+
+    const entry = state.assignments[key];
+    if (!entry || !entry.audioBlob || entry.audioBlob.size === 0) return;
+
+    if (_photoAudio) { _photoAudio.pause(); }
+    const url = URL.createObjectURL(entry.audioBlob);
+    _photoAudio = new Audio(url);
+    _photoAudio.onended = () => URL.revokeObjectURL(url);
+    _photoAudio.play().catch(() => {});
+  });
+
   downloadBtn.addEventListener('click', () => {
     const link = document.createElement('a');
     link.download = 'my-family.png';

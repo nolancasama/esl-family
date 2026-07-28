@@ -213,6 +213,68 @@ const Photo = (() => {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  /* ── Click-to-play: hit-testing + a little tap feedback ────────────── */
+  let _scene      = null;  // { cards, wallpaperImg } from the last compose()
+  let _animating  = false; // true during the reveal or a pulse — ignore clicks
+
+  // Maps a click's viewport coords to a card key, accounting for the
+  // canvas's object-fit:contain letterboxing within its CSS box.
+  function getCardAt(canvasEl, clientX, clientY) {
+    if (_animating || !_scene) return null;
+    const rect = canvasEl.getBoundingClientRect();
+    const boxAspect = rect.width / rect.height;
+    const imgAspect  = CW / CH;
+
+    let renderW, renderH, offsetX, offsetY;
+    if (boxAspect > imgAspect) {
+      renderH = rect.height;
+      renderW = renderH * imgAspect;
+      offsetX = (rect.width - renderW) / 2;
+      offsetY = 0;
+    } else {
+      renderW = rect.width;
+      renderH = renderW / imgAspect;
+      offsetX = 0;
+      offsetY = (rect.height - renderH) / 2;
+    }
+
+    const px = clientX - rect.left - offsetX;
+    const py = clientY - rect.top - offsetY;
+    if (px < 0 || py < 0 || px > renderW || py > renderH) return null;
+
+    const x = (px / renderW) * CW;
+    const y = (py / renderH) * CH;
+
+    for (const card of _scene.cards) {
+      const blockH = card.h + GAP + NAMEPLATE_H;
+      if (x >= card.x && x <= card.x + card.w && y >= card.y && y <= card.y + blockH) {
+        return card.key;
+      }
+    }
+    return null;
+  }
+
+  // Brief scale-up-and-back on the tapped card, as a visual "heard you" cue.
+  function pulseCard(canvasEl, key) {
+    if (_animating || !_scene) return;
+    const { cards, wallpaperImg } = _scene;
+    if (!cards.some(c => c.key === key)) return;
+
+    _animating = true;
+    const ctx = canvasEl.getContext('2d');
+    const start = performance.now();
+    const DURATION = 240;
+    function tick(now) {
+      const t = Math.min(1, (now - start) / DURATION);
+      const pulse = 1 + Math.sin(t * Math.PI) * 0.08;
+      drawBackdrop(ctx, wallpaperImg);
+      cards.forEach(c => drawCard(ctx, c, c.key === key ? pulse : 1));
+      if (t < 1) requestAnimationFrame(tick);
+      else _animating = false;
+    }
+    requestAnimationFrame(tick);
+  }
+
   /* ── Main compose ────────────────────────────────────────────────── */
   async function compose(canvasEl, assignments, selfieDataURL, playerName) {
     // Render at a higher pixel density than the CSS display size (which can
@@ -269,18 +331,21 @@ const Photo = (() => {
     });
 
     drawBackdrop(ctx, wallpaperImg);
+    _scene = { cards, wallpaperImg };
 
     // Reveal one at a time — everyone else first, the student's own photo last.
+    _animating = true;
     const revealOrder = [...cards.filter(c => c.key !== 'me'), ...cards.filter(c => c.key === 'me')];
     for (let i = 0; i < revealOrder.length; i++) {
       await popIn(ctx, wallpaperImg, revealOrder, i, 260);
       await sleep(i === revealOrder.length - 1 ? 0 : 90);
     }
+    _animating = false;
   }
 
   function capitalize(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
-  return { compose, CW, CH };
+  return { compose, getCardAt, pulseCard, CW, CH };
 })();
