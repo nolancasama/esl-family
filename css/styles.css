@@ -22,46 +22,26 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Loading screen ───────────────────────────────────────────────── */
+/* ── Loading screen (dark, matches the intro's style) ─────────────── */
 #loading-screen {
   position: fixed;
   inset: 0;
-  background: var(--bg);
+  background: #0A0A14;
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-#loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  text-align: center;
-}
 #loading-title {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--blue);
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #F4F1E8;
+  letter-spacing: .04em;
+  animation: loading-pulse 1.4s ease-in-out infinite;
 }
-#loading-bar-wrap {
-  width: 220px;
-  height: 10px;
-  background: #CBD5E1;
-  border-radius: 99px;
-  overflow: hidden;
-}
-#loading-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--blue), var(--teal));
-  border-radius: 99px;
-  transition: width 0.15s ease;
-}
-#loading-count {
-  font-size: .9rem;
-  font-weight: 700;
-  color: var(--muted);
+@keyframes loading-pulse {
+  0%, 100% { opacity: .4; }
+  50%      { opacity: 1; }
 }
 
 html, body {
@@ -284,13 +264,6 @@ html, body {
   object-fit: contain;
   display: block;
   margin: 0 auto 6px;
-}
-
-.char-card .char-name {
-  font-size: .8rem;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.2;
 }
 
 .choose-actions {

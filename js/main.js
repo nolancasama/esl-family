@@ -98,13 +98,8 @@
 
   // ── Boot ───────────────────────────────────────────────────────────
   const loadingScreen = $('loading-screen');
-  const loadingBar    = $('loading-bar');
-  const loadingCount  = $('loading-count');
 
-  await Characters.load((done, total) => {
-    loadingCount.textContent    = `${done} / ${total}`;
-    loadingBar.style.width      = `${Math.round(done / total * 100)}%`;
-  });
+  await Characters.load();
   loadingScreen.style.display = 'none';
 
   Presentation.init({
