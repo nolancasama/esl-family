@@ -62,6 +62,7 @@ esl-family/
   js/
     main.js          — app state machine
     intro.js         — text-only opening sequence (typewriter dialogue + name prompt)
+    profile.js       — RPG-style character profile card (choose phase)
     characters.js    — manifest loading + shuffle/lookup helpers
     speech.js        — Web Speech API wrapper + role parsing
     recorder.js      — MediaRecorder audio capture
@@ -71,8 +72,12 @@ esl-family/
   assets/
     characters.json  — character manifest (source of truth)
     characters/      — character portrait art
+    profiles.json    — per-character profile data (name, age, likes, etc.)
     frames/          — picture-frame art for the final photo screen
-    wallpaper.png     — backdrop texture for the final photo screen
+    choose-bg.jpg    — backdrop for the choose phase
+    selfie-bg.jpg    — backdrop for the selfie phase
+    presentation-bg.jpg — backdrop for the presentation phase
+    photo-bg.jpg     — backdrop for the final photo screen
     bodies/          — (empty) reserved for future body sprite assets
 ```
 
@@ -98,4 +103,4 @@ The app has no backend. Deploy the `esl-family/` folder to any static host:
 ## Third-party assets
 
 - `assets/frames/` — picture frame art from the [Portrait Frame Pack](https://opengameart.org/content/portrait-frame-pack) by Screaming Brain Studios (CC0, no attribution required).
-- `assets/wallpaper.png` — ["Gray Floral"](https://www.toptal.com/designers/subtlepatterns/gray-floral/) pattern by Lauren, via Toptal Subtle Patterns (CC BY — attribution required, commercial use permitted).
+- `assets/choose-bg.jpg`, `assets/selfie-bg.jpg`, `assets/presentation-bg.jpg`, `assets/photo-bg.jpg` — AI-generated illustrations.

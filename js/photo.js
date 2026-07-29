@@ -29,13 +29,13 @@ const Photo = (() => {
   // Each relation gets its own rectangular frame size — a gallery wall
   // of mismatched frames, not a uniform grid.
   const SIZE = {
-    grandfather: { w: 150, h: 200 },
-    grandmother: { w: 150, h: 200 },
-    father:      { w: 135, h: 180 },
-    mother:      { w: 135, h: 180 },
-    brother:     { w: 115, h: 155 },
-    sister:      { w: 115, h: 155 },
-    me:          { w: 125, h: 170 },
+    grandfather: { w: 128, h: 170 },
+    grandmother: { w: 128, h: 170 },
+    father:      { w: 115, h: 153 },
+    mother:      { w: 115, h: 153 },
+    brother:     { w: 98,  h: 132 },
+    sister:      { w: 98,  h: 132 },
+    me:          { w: 106, h: 145 },
   };
 
   // Each frame PNG's transparent "hole", as a fraction of the source
@@ -51,7 +51,7 @@ const Photo = (() => {
     me:          { src: 'assets/frames/frame-me.png',          hole: { x0: 0.1250, y0: 0.1250, x1: 0.8750, y1: 0.8750 } },
   };
 
-  const WALLPAPER_SRC = 'assets/wallpaper.png';
+  const BACKDROP_SRC = 'assets/photo-bg.jpg';
 
   /* ── Helpers ────────────────────────────────────────────────────── */
   function loadImage(src) {
@@ -92,23 +92,24 @@ const Photo = (() => {
     return { positions, maxH };
   }
 
-  /* ── Backdrop: warm wash + tiled floral wallpaper ─────────────────── */
-  function drawBackdrop(ctx, wallpaperImg) {
-    const bg = ctx.createLinearGradient(0, 0, 0, CH);
-    bg.addColorStop(0, '#F5E9D6');
-    bg.addColorStop(1, '#E8D5B5');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, CW, CH);
-
-    if (wallpaperImg) {
-      const pattern = ctx.createPattern(wallpaperImg, 'repeat');
-      ctx.save();
-      ctx.globalCompositeOperation = 'multiply';
-      ctx.globalAlpha = 0.6;
-      ctx.fillStyle = pattern;
+  /* ── Backdrop: castle wall scene, cover-fit ────────────────────────── */
+  function drawBackdrop(ctx, backdropImg) {
+    if (backdropImg) {
+      drawCover(ctx, backdropImg, 0, 0, CW, CH, 0.4);
+    } else {
+      const bg = ctx.createLinearGradient(0, 0, 0, CH);
+      bg.addColorStop(0, '#F5E9D6');
+      bg.addColorStop(1, '#E8D5B5');
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, CW, CH);
-      ctx.restore();
     }
+
+    // Gentle darken so the frames and nameplates stand out from the wall.
+    const dim = ctx.createLinearGradient(0, 0, 0, CH);
+    dim.addColorStop(0, 'rgba(20,14,8,.2)');
+    dim.addColorStop(1, 'rgba(20,14,8,.36)');
+    ctx.fillStyle = dim;
+    ctx.fillRect(0, 0, CW, CH);
   }
 
   /* ── Cover-fit image draw (matches CSS object-fit:cover) ──────────── */
@@ -194,12 +195,12 @@ const Photo = (() => {
     ctx.restore();
   }
 
-  function popIn(ctx, wallpaperImg, cards, index, durationMs) {
+  function popIn(ctx, backdropImg, cards, index, durationMs) {
     return new Promise(resolve => {
       const start = performance.now();
       function tick(now) {
         const t = Math.min(1, (now - start) / durationMs);
-        drawBackdrop(ctx, wallpaperImg);
+        drawBackdrop(ctx, backdropImg);
         for (let i = 0; i < index; i++) drawCard(ctx, cards[i], 1);
         drawCard(ctx, cards[index], easeOutBack(t));
         if (t < 1) requestAnimationFrame(tick);
@@ -214,7 +215,7 @@ const Photo = (() => {
   }
 
   /* ── Click-to-play: hit-testing + a little tap feedback ────────────── */
-  let _scene      = null;  // { cards, wallpaperImg } from the last compose()
+  let _scene      = null;  // { cards, backdropImg } from the last compose()
   let _animating  = false; // true during the reveal or a pulse — ignore clicks
 
   // Maps a click's viewport coords to a card key, accounting for the
@@ -257,7 +258,7 @@ const Photo = (() => {
   // Brief scale-up-and-back on the tapped card, as a visual "heard you" cue.
   function pulseCard(canvasEl, key) {
     if (_animating || !_scene) return;
-    const { cards, wallpaperImg } = _scene;
+    const { cards, backdropImg } = _scene;
     if (!cards.some(c => c.key === key)) return;
 
     _animating = true;
@@ -267,7 +268,7 @@ const Photo = (() => {
     function tick(now) {
       const t = Math.min(1, (now - start) / DURATION);
       const pulse = 1 + Math.sin(t * Math.PI) * 0.08;
-      drawBackdrop(ctx, wallpaperImg);
+      drawBackdrop(ctx, backdropImg);
       cards.forEach(c => drawCard(ctx, c, c.key === key ? pulse : 1));
       if (t < 1) requestAnimationFrame(tick);
       else _animating = false;
@@ -291,8 +292,8 @@ const Photo = (() => {
     const backRoles  = [orderedRoles[0], orderedRoles[1], orderedRoles[4], orderedRoles[5]].filter(Boolean);
     const frontKeys  = [orderedRoles[2], 'me', orderedRoles[3]].filter(k => k === 'me' || k); // 'me' = student
 
-    const [wallpaperImg, frameImgs, backImgs, frontImgs] = await Promise.all([
-      loadImage(WALLPAPER_SRC),
+    const [backdropImg, frameImgs, backImgs, frontImgs] = await Promise.all([
+      loadImage(BACKDROP_SRC),
       (async () => {
         const entries = await Promise.all(
           Object.keys(FRAME_INFO).map(async key => [key, await loadImage(FRAME_INFO[key].src)])
@@ -330,14 +331,14 @@ const Photo = (() => {
       });
     });
 
-    drawBackdrop(ctx, wallpaperImg);
-    _scene = { cards, wallpaperImg };
+    drawBackdrop(ctx, backdropImg);
+    _scene = { cards, backdropImg };
 
     // Reveal one at a time — everyone else first, the student's own photo last.
     _animating = true;
     const revealOrder = [...cards.filter(c => c.key !== 'me'), ...cards.filter(c => c.key === 'me')];
     for (let i = 0; i < revealOrder.length; i++) {
-      await popIn(ctx, wallpaperImg, revealOrder, i, 260);
+      await popIn(ctx, backdropImg, revealOrder, i, 260);
       await sleep(i === revealOrder.length - 1 ? 0 : 90);
     }
     _animating = false;
