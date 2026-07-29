@@ -26,7 +26,9 @@ Open in **Chrome** (required for Web Speech API). Navigate to `http://localhost:
 2. **Speak** — the 6 chosen characters appear one at a time, in the same order, with the target sentence shown on screen (e.g. "This is my father."). Say it aloud to confirm.
 3. **Selfie** — take a photo for the family portrait.
 4. **Replay** — hear your own English played back for each family member.
-5. **Photo** — receive the composited family portrait. Download or play again.
+5. **Photo** — receive the composited family portrait on the castle wall.
+6. **Talk** — tap any framed portrait to open a short multiple-choice conversation with that family member (a bobbing 「はなそう！」 bubble rotates among them as a hint).
+7. **Reflect** — once every family member has been spoken with, the player's own portrait starts to glow. Tapping it opens the bedroom epilogue: a quiet monologue, a choice of how you feel, and the ending.
 
 ### Accepted phrases
 
@@ -63,6 +65,8 @@ esl-family/
     main.js          — app state machine
     intro.js         — text-only opening sequence (typewriter dialogue + name prompt)
     profile.js       — RPG-style character profile card (choose phase)
+    conversation.js  — interactive multiple-choice conversation scene
+    reflection.js    — bedroom epilogue + synthesized ambient music
     characters.js    — manifest loading + shuffle/lookup helpers
     speech.js        — Web Speech API wrapper + role parsing
     recorder.js      — MediaRecorder audio capture
@@ -70,15 +74,18 @@ esl-family/
     presentation.js  — auto-replay phase
     photo.js         — canvas family portrait compositor
   assets/
-    characters.json  — character manifest (source of truth)
-    characters/      — character portrait art
-    profiles.json    — per-character profile data (name, age, likes, etc.)
-    frames/          — picture-frame art for the final photo screen
-    choose-bg.jpg    — backdrop for the choose phase
-    selfie-bg.jpg    — backdrop for the selfie phase
-    presentation-bg.jpg — backdrop for the presentation phase
-    photo-bg.jpg     — backdrop for the final photo screen
-    bodies/          — (empty) reserved for future body sprite assets
+    characters.json     — character manifest (source of truth)
+    characters/         — character portrait art
+    profiles.json       — per-character profile data (name, age, likes, etc.)
+    conversations.json  — per-role conversation scripts (greeting, Q&A, farewell)
+    frames/              — picture-frame art for the final photo screen
+    choose-bg.jpg        — backdrop for the choose phase
+    selfie-bg.jpg        — backdrop for the selfie phase
+    presentation-bg.jpg  — backdrop for the presentation phase
+    photo-bg.jpg         — backdrop for the final photo screen
+    cottage-bg.jpg, market-bg.jpg, dining-bg.jpg, yard-bg.jpg — conversation-scene backdrops
+    bedroom-bg.jpg       — backdrop for the reflection epilogue
+    bodies/              — (empty) reserved for future body sprite assets
 ```
 
 ## Browser support
@@ -103,4 +110,4 @@ The app has no backend. Deploy the `esl-family/` folder to any static host:
 ## Third-party assets
 
 - `assets/frames/` — picture frame art from the [Portrait Frame Pack](https://opengameart.org/content/portrait-frame-pack) by Screaming Brain Studios (CC0, no attribution required).
-- `assets/choose-bg.jpg`, `assets/selfie-bg.jpg`, `assets/presentation-bg.jpg`, `assets/photo-bg.jpg` — AI-generated illustrations.
+- `assets/*-bg.jpg` (choose, selfie, presentation, photo, cottage, market, dining, yard, bedroom) — AI-generated illustrations.

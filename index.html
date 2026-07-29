@@ -189,11 +189,59 @@
   </div>
 </div>
 
+<!-- "Let's talk!" hint bubble — rotates among family portraits on the photo screen -->
+<div id="hint-bubble">💬 はなそう！</div>
+
+<!-- Golden glow + star, anchored over the player's own portrait once every
+     family member has been spoken with -->
+<div id="me-glow"><span id="me-star">★</span></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CONVERSATION SCENE (opens over the family photo screen)
+═══════════════════════════════════════════════════════════════════ -->
+<div id="convo-overlay">
+  <button id="convo-close-btn" aria-label="とじる" title="とじる">✕</button>
+  <div id="convo-portrait-frame">
+    <img id="convo-portrait" src="" alt="">
+  </div>
+  <div id="convo-box">
+    <div id="convo-speaker"></div>
+    <div id="convo-text"></div>
+    <div id="convo-answers"></div>
+    <div id="convo-hint">タップ</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     REFLECTION SCENE — the epilogue, in the player's bedroom
+═══════════════════════════════════════════════════════════════════ -->
+<div id="reflect-overlay">
+  <div id="reflect-box">
+    <div id="reflect-portrait-wrap">
+      <img id="reflect-portrait" src="" alt="">
+    </div>
+    <div id="reflect-body">
+      <div id="reflect-speaker"></div>
+      <div id="reflect-text"></div>
+      <div id="reflect-choices"></div>
+      <div id="reflect-hint">タップ</div>
+    </div>
+  </div>
+  <div id="reflect-end">
+    <div id="reflect-end-title">The End</div>
+    <div id="reflect-end-sub">あそんでくれて ありがとう！</div>
+    <button id="reflect-replay-btn" class="btn btn-primary">もういちど あそぶ！</button>
+  </div>
+</div>
+
 <!-- Camera flash overlay -->
 <div id="flash-overlay"></div>
 
 <!-- Scene transition (fade to white, then fade back in) -->
 <div id="scene-fade"></div>
+
+<!-- Fade to black, used going into the reflection scene -->
+<div id="black-fade"></div>
 
 <!-- Scripts — load order matters (dependencies first) -->
 <script src="js/characters.js"></script>
@@ -204,6 +252,8 @@
 <script src="js/photo.js"></script>
 <script src="js/intro.js"></script>
 <script src="js/profile.js"></script>
+<script src="js/conversation.js"></script>
+<script src="js/reflection.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

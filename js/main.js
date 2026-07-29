@@ -46,6 +46,7 @@
     selfieDataURL:  null,
     micOpen:        false,
     playerName:     '',
+    talkedTo:       new Set(), // roles the player has finished a conversation with
   };
 
   // ── DOM refs ───────────────────────────────────────────────────────
@@ -115,12 +116,18 @@
   const photoCanvas    = $('family-photo-canvas');
   const downloadBtn    = $('download-btn');
   const playAgainBtn   = $('play-again-btn');
+  const hintBubble     = $('hint-bubble');
+  const meGlow         = $('me-glow');
+  const blackFade      = $('black-fade');
 
   // ── Boot ───────────────────────────────────────────────────────────
   const loadingScreen = $('loading-screen');
 
-  await Promise.all([Characters.load(), Profile.load()]);
+  await Promise.all([Characters.load(), Profile.load(), Conversation.load()]);
   loadingScreen.style.display = 'none';
+
+  // Warm the bedroom backdrop so the reflection scene fades in already painted.
+  new Image().src = 'assets/bedroom-bg.jpg';
 
   Profile.init({
     overlay:   profileOverlay,
@@ -132,6 +139,31 @@
     backBtn:   profileBackBtn,
     chooseBtn: profileChooseBtn,
   });
+
+  Conversation.init({
+    overlay:      $('convo-overlay'),
+    portraitFrame: $('convo-portrait-frame'),
+    portrait:     $('convo-portrait'),
+    box:          $('convo-box'),
+    speaker:      $('convo-speaker'),
+    text:         $('convo-text'),
+    answers:      $('convo-answers'),
+    hint:         $('convo-hint'),
+    closeBtn:     $('convo-close-btn'),
+  });
+
+  Reflection.init({
+    overlay:      $('reflect-overlay'),
+    box:          $('reflect-box'),
+    portraitWrap: $('reflect-portrait-wrap'),
+    portrait:     $('reflect-portrait'),
+    speaker:      $('reflect-speaker'),
+    text:         $('reflect-text'),
+    choices:      $('reflect-choices'),
+    hint:         $('reflect-hint'),
+    end:          $('reflect-end'),
+    replayBtn:    $('reflect-replay-btn'),
+  }, () => enterChoosePhase());
 
   Presentation.init({
     charImg:  presCharImg,
@@ -170,8 +202,13 @@
     state.assignments     = {};
     state.selfieDataURL   = null;
     state.assignIndex     = 0;
+    state.talkedTo        = new Set();
 
     Profile.close();
+    Conversation.close();
+    Reflection.close();
+    stopHintRotation();
+    hideMeGlow();
     familyLineup.innerHTML = '';
 
     showPhase('choose');
@@ -556,24 +593,127 @@
 
     // Frames pop in one at a time, the student's own photo last.
     await Photo.compose(photoCanvas, state.assignments, state.selfieDataURL, state.playerName);
+
+    startHintRotation();
   }
 
-  // Tap a framed portrait on the final photo to hear that member's recording.
-  let _photoAudio = null;
+  // "Tap me!" bubble — invites the player toward a random family member,
+  // rotating among them until a conversation actually starts.
+  const HINT_SHOW_MS = 4000;
+  const HINT_FADE_MS = 300;
+  let _hintTimer = null;
+  let _hintKey   = null;
+
+  function startHintRotation() {
+    stopHintRotation();
+    hintCycle();
+  }
+
+  function hintCycle() {
+    const keys = Object.keys(state.assignments);
+    if (keys.length === 0) { _hintTimer = null; return; }
+
+    let next = keys[Math.floor(Math.random() * keys.length)];
+    if (keys.length > 1 && next === _hintKey) {
+      next = keys[(keys.indexOf(next) + 1) % keys.length];
+    }
+    _hintKey = next;
+    positionHint(next);
+    hintBubble.classList.add('visible');
+
+    _hintTimer = setTimeout(() => {
+      hintBubble.classList.remove('visible');
+      _hintTimer = setTimeout(hintCycle, HINT_FADE_MS);
+    }, HINT_SHOW_MS);
+  }
+
+  function positionHint(key) {
+    const rect = Photo.getCardScreenRect(photoCanvas, key);
+    if (!rect) { hintBubble.classList.remove('visible'); return; }
+    hintBubble.style.left = `${rect.left + rect.width / 2}px`;
+    hintBubble.style.top  = `${rect.top}px`;
+  }
+
+  function stopHintRotation() {
+    clearTimeout(_hintTimer);
+    _hintTimer = null;
+    _hintKey   = null;
+    hintBubble.classList.remove('visible');
+  }
+
+  window.addEventListener('resize', () => {
+    if (_hintKey) positionHint(_hintKey);
+    if (meGlow.classList.contains('visible')) refreshMeGlow();
+  });
+
+  // ── Player-portrait glow: appears once every family member has been met ──
+  function allFamilyTalkedTo() {
+    const roles = Object.keys(state.assignments);
+    return roles.length > 0 && roles.every(r => state.talkedTo.has(r));
+  }
+
+  function refreshMeGlow() {
+    if (!allFamilyTalkedTo()) { meGlow.classList.remove('visible'); return; }
+    const rect = Photo.getCardScreenRect(photoCanvas, 'me');
+    if (!rect) { meGlow.classList.remove('visible'); return; }
+    meGlow.style.left   = `${rect.left}px`;
+    meGlow.style.top    = `${rect.top}px`;
+    meGlow.style.width  = `${rect.width}px`;
+    meGlow.style.height = `${rect.height}px`;
+    meGlow.classList.add('visible');
+  }
+
+  function hideMeGlow() { meGlow.classList.remove('visible'); }
+
+  // Tap a framed portrait on the final photo to talk with that family member.
   photoCanvas.addEventListener('click', (e) => {
+    if (Conversation.isOpen() || Reflection.isOpen()) return;
     const key = Photo.getCardAt(photoCanvas, e.clientX, e.clientY);
     if (!key) return;
     Photo.pulseCard(photoCanvas, key);
 
-    const entry = state.assignments[key];
-    if (!entry || !entry.audioBlob || entry.audioBlob.size === 0) return;
+    // The player's own frame: once everyone has been met, it leads to the
+    // reflection scene. Before that it's just a pulse.
+    if (key === 'me') {
+      if (allFamilyTalkedTo()) {
+        stopHintRotation();
+        hideMeGlow();
+        enterReflection();
+      }
+      return;
+    }
 
-    if (_photoAudio) { _photoAudio.pause(); }
-    const url = URL.createObjectURL(entry.audioBlob);
-    _photoAudio = new Audio(url);
-    _photoAudio.onended = () => URL.revokeObjectURL(url);
-    _photoAudio.play().catch(() => {});
+    const entry = state.assignments[key];
+    if (!entry) return;
+
+    stopHintRotation();
+    hideMeGlow();
+    const speakerName = Profile.displayName(entry.char.id) || capitalize(key);
+    Conversation.start(
+      key,
+      speakerName,
+      Characters.imgUrl(entry.char),
+      state.selfieDataURL,
+      state.playerName,
+      () => {
+        state.talkedTo.add(key);
+        startHintRotation();
+        refreshMeGlow();
+      }
+    );
   });
+
+  // ── ═══════════════════════════════════════════════════════════════
+  //   REFLECTION — the epilogue, after every family member has been met
+  // ══════════════════════════════════════════════════════════════════
+  function enterReflection() {
+    // Fade to black, swap scenes behind the curtain, then fade back in.
+    blackFade.classList.add('active');
+    setTimeout(() => {
+      Reflection.start(state.selfieDataURL, state.playerName);
+      blackFade.classList.remove('active');
+    }, 520);
+  }
 
   downloadBtn.addEventListener('click', () => {
     const link = document.createElement('a');

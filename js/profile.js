@@ -90,7 +90,13 @@ const Profile = (() => {
     } catch (_) {}
   }
 
-  return { load, init, open, close, say };
+  // The character's personal name (e.g. "David"), for use outside the card.
+  function displayName(charId) {
+    const d = _profiles[charId];
+    return d ? d.name : '';
+  }
+
+  return { load, init, open, close, say, displayName };
 })();
 
 

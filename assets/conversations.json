@@ -1,0 +1,452 @@
+{
+  "grandfather": {
+    "bg": "assets/yard-bg.jpg",
+    "greeting": "Hello! Come and sit with me.",
+    "questions": [
+      {
+        "text": "What sport do you like?",
+        "answers": [
+          {
+            "text": "I like soccer.",
+            "reply": "Soccer is fun! I played soccer too."
+          },
+          {
+            "text": "I like baseball.",
+            "reply": "Baseball! You have a strong arm."
+          },
+          {
+            "text": "I like swimming.",
+            "reply": "Swimming is great. The water is nice."
+          }
+        ]
+      },
+      {
+        "text": "Do you like the mountains or the sea?",
+        "answers": [
+          {
+            "text": "I like the mountains.",
+            "reply": "Me too! The air is clean up there."
+          },
+          {
+            "text": "I like the sea.",
+            "reply": "The sea is beautiful. I love the waves."
+          },
+          {
+            "text": "I like both.",
+            "reply": "Ha ha! Good answer. Nature is wonderful."
+          }
+        ]
+      },
+      {
+        "text": "What animal do you like?",
+        "answers": [
+          {
+            "text": "I like dogs.",
+            "reply": "Dogs are good friends. Very loyal!"
+          },
+          {
+            "text": "I like birds.",
+            "reply": "Birds are free. I watch them every morning."
+          },
+          {
+            "text": "I like horses.",
+            "reply": "Horses are strong and kind. Wonderful!"
+          }
+        ]
+      },
+      {
+        "text": "What do you want to do together?",
+        "answers": [
+          {
+            "text": "I want to go hiking.",
+            "reply": "Yes! Let's climb a mountain someday."
+          },
+          {
+            "text": "I want to go fishing.",
+            "reply": "Good idea. Fishing is very peaceful."
+          },
+          {
+            "text": "I want to play catch.",
+            "reply": "Ha ha! I am still fast. Let's play!"
+          }
+        ]
+      }
+    ],
+    "farewell": "Thank you for talking with me. Come again soon!"
+  },
+  "grandmother": {
+    "bg": "assets/cottage-bg.jpg",
+    "greeting": "Oh, hello dear! I am so happy to see you.",
+    "questions": [
+      {
+        "text": "What season do you like?",
+        "answers": [
+          {
+            "text": "I like spring.",
+            "reply": "Spring is lovely. The flowers are beautiful."
+          },
+          {
+            "text": "I like summer.",
+            "reply": "Summer! We can eat cold watermelon."
+          },
+          {
+            "text": "I like winter.",
+            "reply": "Winter is nice. We can drink warm tea."
+          }
+        ]
+      },
+      {
+        "text": "What food do you like?",
+        "answers": [
+          {
+            "text": "I like cake.",
+            "reply": "Cake! I will bake one for you."
+          },
+          {
+            "text": "I like cookies.",
+            "reply": "Cookies are my favorite too. Let's make some!"
+          },
+          {
+            "text": "I like soup.",
+            "reply": "Warm soup is good for you. Very healthy!"
+          }
+        ]
+      },
+      {
+        "text": "When is your birthday?",
+        "answers": [
+          {
+            "text": "My birthday is in spring.",
+            "reply": "How nice! We will have a flower party."
+          },
+          {
+            "text": "My birthday is in summer.",
+            "reply": "Wonderful! A summer birthday is fun."
+          },
+          {
+            "text": "My birthday is in winter.",
+            "reply": "Lovely! We will make a warm cake."
+          }
+        ]
+      },
+      {
+        "text": "What color do you like?",
+        "answers": [
+          {
+            "text": "I like pink.",
+            "reply": "Pink is so pretty. Like the flowers!"
+          },
+          {
+            "text": "I like blue.",
+            "reply": "Blue is calm and kind. A good color."
+          },
+          {
+            "text": "I like green.",
+            "reply": "Green is the color of my garden. Lovely!"
+          }
+        ]
+      }
+    ],
+    "farewell": "Thank you, dear. Our family is happy now."
+  },
+  "father": {
+    "bg": "assets/dining-bg.jpg",
+    "greeting": "Hey! Good to see you. How are you today?",
+    "questions": [
+      {
+        "text": "What do you want to be?",
+        "answers": [
+          {
+            "text": "I want to be a teacher.",
+            "reply": "A teacher! You can help many people."
+          },
+          {
+            "text": "I want to be a doctor.",
+            "reply": "A doctor! That is a great dream."
+          },
+          {
+            "text": "I want to be an artist.",
+            "reply": "An artist! You have a good imagination."
+          }
+        ]
+      },
+      {
+        "text": "What do you do after school?",
+        "answers": [
+          {
+            "text": "I play with my friends.",
+            "reply": "Good! Friends are important."
+          },
+          {
+            "text": "I do my homework.",
+            "reply": "Wow, you work hard. I am proud of you."
+          },
+          {
+            "text": "I read books.",
+            "reply": "Reading is great. Books make you strong."
+          }
+        ]
+      },
+      {
+        "text": "What sport do you like?",
+        "answers": [
+          {
+            "text": "I like soccer.",
+            "reply": "Nice! Let's play together this weekend."
+          },
+          {
+            "text": "I like basketball.",
+            "reply": "Basketball is exciting. You are fast!"
+          },
+          {
+            "text": "I like running.",
+            "reply": "Running is good for you. Keep going!"
+          }
+        ]
+      },
+      {
+        "text": "Where do you want to go?",
+        "answers": [
+          {
+            "text": "I want to go to America.",
+            "reply": "America! Let's go there someday."
+          },
+          {
+            "text": "I want to go to Australia.",
+            "reply": "Australia! You can see kangaroos."
+          },
+          {
+            "text": "I want to go to Egypt.",
+            "reply": "Egypt! The pyramids are amazing."
+          }
+        ]
+      }
+    ],
+    "farewell": "You did great today. I believe in you!"
+  },
+  "mother": {
+    "bg": "assets/market-bg.jpg",
+    "greeting": "Welcome home! Are you hungry?",
+    "questions": [
+      {
+        "text": "What food do you like?",
+        "answers": [
+          {
+            "text": "I like curry.",
+            "reply": "Curry! I will make it for dinner."
+          },
+          {
+            "text": "I like sushi.",
+            "reply": "Sushi is delicious. Let's eat it together."
+          },
+          {
+            "text": "I like pizza.",
+            "reply": "Pizza! We can make one at home."
+          }
+        ]
+      },
+      {
+        "text": "What fruit do you like?",
+        "answers": [
+          {
+            "text": "I like apples.",
+            "reply": "Apples are sweet and healthy. Good choice!"
+          },
+          {
+            "text": "I like strawberries.",
+            "reply": "Strawberries! They are my favorite too."
+          },
+          {
+            "text": "I like bananas.",
+            "reply": "Bananas give you energy. Very good!"
+          }
+        ]
+      },
+      {
+        "text": "Do you want to go shopping with me?",
+        "answers": [
+          {
+            "text": "Yes, I want to go.",
+            "reply": "Wonderful! Let's buy something nice."
+          },
+          {
+            "text": "Yes, I like shopping.",
+            "reply": "Great! We will have a fun day."
+          },
+          {
+            "text": "Maybe tomorrow.",
+            "reply": "That's okay. Tomorrow is good too."
+          }
+        ]
+      },
+      {
+        "text": "What do you want to cook?",
+        "answers": [
+          {
+            "text": "I want to make cookies.",
+            "reply": "Cookies! Let's bake them together."
+          },
+          {
+            "text": "I want to make soup.",
+            "reply": "Soup is easy and warm. Good idea!"
+          },
+          {
+            "text": "I want to make rice.",
+            "reply": "Rice is important. I will teach you."
+          }
+        ]
+      }
+    ],
+    "farewell": "Thank you for talking with me. Dinner is almost ready!"
+  },
+  "brother": {
+    "bg": "assets/yard-bg.jpg",
+    "greeting": "Hi! Do you want to play with me?",
+    "questions": [
+      {
+        "text": "What game do you like?",
+        "answers": [
+          {
+            "text": "I like video games.",
+            "reply": "Cool! Let's play together after school."
+          },
+          {
+            "text": "I like card games.",
+            "reply": "Card games are fun. I will teach you one!"
+          },
+          {
+            "text": "I like tag.",
+            "reply": "Tag! You can't catch me. Ha ha!"
+          }
+        ]
+      },
+      {
+        "text": "What animal do you like?",
+        "answers": [
+          {
+            "text": "I like dogs.",
+            "reply": "Dogs are the best! Let's get one."
+          },
+          {
+            "text": "I like cats.",
+            "reply": "Cats are cute and funny. Nice!"
+          },
+          {
+            "text": "I like dinosaurs.",
+            "reply": "Whoa, dinosaurs! They are so big and cool."
+          }
+        ]
+      },
+      {
+        "text": "What do you do after school?",
+        "answers": [
+          {
+            "text": "I play outside.",
+            "reply": "Me too! Let's go to the park."
+          },
+          {
+            "text": "I play games.",
+            "reply": "Nice! Can I play too?"
+          },
+          {
+            "text": "I ride my bike.",
+            "reply": "Cool! Let's ride together."
+          }
+        ]
+      },
+      {
+        "text": "What color do you like?",
+        "answers": [
+          {
+            "text": "I like blue.",
+            "reply": "Blue is cool! That's my favorite too."
+          },
+          {
+            "text": "I like red.",
+            "reply": "Red is strong. Nice choice!"
+          },
+          {
+            "text": "I like green.",
+            "reply": "Green like the trees. Awesome!"
+          }
+        ]
+      }
+    ],
+    "farewell": "That was fun! Let's play again tomorrow."
+  },
+  "sister": {
+    "bg": "assets/selfie-bg.jpg",
+    "greeting": "Hi! You look nice today.",
+    "questions": [
+      {
+        "text": "What color do you like?",
+        "answers": [
+          {
+            "text": "I like pink.",
+            "reply": "Pink is so cute! I love it too."
+          },
+          {
+            "text": "I like purple.",
+            "reply": "Purple is pretty and cool. Nice!"
+          },
+          {
+            "text": "I like yellow.",
+            "reply": "Yellow is happy, like the sun!"
+          }
+        ]
+      },
+      {
+        "text": "What do you like to do?",
+        "answers": [
+          {
+            "text": "I like drawing.",
+            "reply": "Drawing is fun! Let's draw together."
+          },
+          {
+            "text": "I like singing.",
+            "reply": "Singing! Your voice is beautiful."
+          },
+          {
+            "text": "I like dancing.",
+            "reply": "Dancing is so fun. Show me later!"
+          }
+        ]
+      },
+      {
+        "text": "What animal do you like?",
+        "answers": [
+          {
+            "text": "I like cats.",
+            "reply": "Cats are so soft and cute!"
+          },
+          {
+            "text": "I like rabbits.",
+            "reply": "Rabbits! They are small and fluffy."
+          },
+          {
+            "text": "I like birds.",
+            "reply": "Birds sing pretty songs. I like them too."
+          }
+        ]
+      },
+      {
+        "text": "What food do you like?",
+        "answers": [
+          {
+            "text": "I like ice cream.",
+            "reply": "Ice cream! Let's get some today."
+          },
+          {
+            "text": "I like cake.",
+            "reply": "Cake is the best. Yum!"
+          },
+          {
+            "text": "I like strawberries.",
+            "reply": "Strawberries are sweet and pink. Perfect!"
+          }
+        ]
+      }
+    ],
+    "farewell": "Talking with you is fun. See you later!"
+  }
+}

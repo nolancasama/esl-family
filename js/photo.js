@@ -29,8 +29,8 @@ const Photo = (() => {
   // Each relation gets its own rectangular frame size — a gallery wall
   // of mismatched frames, not a uniform grid.
   const SIZE = {
-    grandfather: { w: 128, h: 170 },
-    grandmother: { w: 128, h: 170 },
+    grandfather: { w: 118, h: 156 },
+    grandmother: { w: 118, h: 156 },
     father:      { w: 115, h: 153 },
     mother:      { w: 115, h: 153 },
     brother:     { w: 98,  h: 132 },
@@ -220,8 +220,10 @@ const Photo = (() => {
 
   // Maps a click's viewport coords to a card key, accounting for the
   // canvas's object-fit:contain letterboxing within its CSS box.
-  function getCardAt(canvasEl, clientX, clientY) {
-    if (_animating || !_scene) return null;
+  // How the canvas's internal CW×CH image maps into its on-screen CSS box,
+  // accounting for object-fit:contain letterboxing. Shared by hit-testing
+  // (screen → canvas space) and the hint bubble (canvas → screen space).
+  function getRenderBox(canvasEl) {
     const rect = canvasEl.getBoundingClientRect();
     const boxAspect = rect.width / rect.height;
     const imgAspect  = CW / CH;
@@ -238,6 +240,12 @@ const Photo = (() => {
       offsetX = 0;
       offsetY = (rect.height - renderH) / 2;
     }
+    return { rect, renderW, renderH, offsetX, offsetY };
+  }
+
+  function getCardAt(canvasEl, clientX, clientY) {
+    if (_animating || !_scene) return null;
+    const { rect, renderW, renderH, offsetX, offsetY } = getRenderBox(canvasEl);
 
     const px = clientX - rect.left - offsetX;
     const py = clientY - rect.top - offsetY;
@@ -253,6 +261,24 @@ const Photo = (() => {
       }
     }
     return null;
+  }
+
+  // Viewport-space rect (like getBoundingClientRect) for a given card's
+  // frame — used to anchor the "tap me!" hint bubble above a portrait.
+  function getCardScreenRect(canvasEl, key) {
+    if (_animating || !_scene) return null;
+    const card = _scene.cards.find(c => c.key === key);
+    if (!card) return null;
+
+    const { rect, renderW, renderH, offsetX, offsetY } = getRenderBox(canvasEl);
+    const sx = renderW / CW, sy = renderH / CH;
+
+    return {
+      left:   rect.left + offsetX + card.x * sx,
+      top:    rect.top  + offsetY + card.y * sy,
+      width:  card.w * sx,
+      height: card.h * sy,
+    };
   }
 
   // Brief scale-up-and-back on the tapped card, as a visual "heard you" cue.
@@ -348,5 +374,5 @@ const Photo = (() => {
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
-  return { compose, getCardAt, pulseCard, CW, CH };
+  return { compose, getCardAt, getCardScreenRect, pulseCard, CW, CH };
 })();

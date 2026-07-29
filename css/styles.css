@@ -838,6 +838,456 @@ html, body {
   z-index: 10;
 }
 
+/* "Tap me!" hint bubble — JS anchors it (left/top) to a portrait's
+   on-screen position; position:fixed keeps that independent of any
+   ancestor's layout. Purely decorative, so clicks pass through to the
+   canvas beneath it. */
+#hint-bubble {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9;
+  transform: translate(-50%, calc(-100% - 14px));
+  background: #fff;
+  color: #4A3620;
+  font-size: .85rem;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 16px;
+  border: 2px solid rgba(0,0,0,.1);
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .3s ease, visibility .3s;
+}
+#hint-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid #fff;
+}
+#hint-bubble.visible {
+  opacity: 1;
+  visibility: visible;
+  animation: hint-bob 1.6s ease-in-out infinite;
+}
+@keyframes hint-bob {
+  0%, 100% { transform: translate(-50%, calc(-100% - 14px)); }
+  50%      { transform: translate(-50%, calc(-100% - 20px)); }
+}
+
+/* ── Player-portrait glow, once every family member has been talked to ──
+   JS anchors this over the "me" frame; the star bobs just above it. */
+#me-glow {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 8;
+  border-radius: 14px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .6s ease, visibility .6s;
+}
+#me-glow.visible {
+  opacity: 1;
+  visibility: visible;
+  animation: me-pulse 2.4s ease-in-out infinite;
+}
+@keyframes me-pulse {
+  0%, 100% {
+    box-shadow: 0 0 16px 4px rgba(255,214,120,.55),
+                0 0 42px 12px rgba(255,190,80,.30);
+  }
+  50% {
+    box-shadow: 0 0 26px 8px rgba(255,226,150,.85),
+                0 0 68px 22px rgba(255,200,90,.45);
+  }
+}
+
+#me-star {
+  position: absolute;
+  left: 50%;
+  top: -34px;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  color: #FFD873;
+  text-shadow: 0 0 10px rgba(255,206,100,.95), 0 0 22px rgba(255,180,60,.7);
+  animation: star-float 2.6s ease-in-out infinite;
+}
+@keyframes star-float {
+  0%, 100% { transform: translateX(-50%) translateY(0)     rotate(0deg);  }
+  50%      { transform: translateX(-50%) translateY(-9px)  rotate(14deg); }
+}
+
+/* ── ═══════════════════════════════════════════════════════════════
+   REFLECTION SCENE  (bedroom epilogue)
+   ══════════════════════════════════════════════════════════════════ */
+#reflect-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background-image: url('../assets/bedroom-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .8s ease, visibility .8s;
+}
+#reflect-overlay.active { opacity: 1; visibility: visible; }
+
+/* Fades the whole scene down to black for the closing title */
+#reflect-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  transition: opacity 1.1s ease;
+  pointer-events: none;
+}
+#reflect-overlay.ending::before { opacity: 1; }
+
+/* Dialogue box — same treatment as the conversation scene */
+#reflect-box {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  width: min(920px, calc(100% - 32px));
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 26px 20px;
+  cursor: pointer;
+  color: #FDF6E6;
+  background: linear-gradient(to bottom, rgba(28,36,66,.94), rgba(14,20,40,.96));
+  border: 2px solid rgba(240,214,150,.75);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 4px rgba(14,20,40,.9),
+    0 14px 36px rgba(0,0,0,.55),
+    inset 0 0 26px rgba(120,150,220,.14);
+  transition: opacity .8s ease, visibility .8s;
+}
+#reflect-box.hidden { opacity: 0; visibility: hidden; }
+
+#reflect-portrait-wrap {
+  flex-shrink: 0;
+  width: 92px;
+  height: 92px;
+  padding: 5px;
+  background: #fff;
+  border: 3px solid rgba(240,214,150,.85);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.45);
+  overflow: hidden;
+}
+#reflect-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
+  border-radius: 9px;
+  display: block;
+}
+
+#reflect-body { flex: 1; min-width: 0; }
+
+#reflect-speaker {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #F0D696;
+  letter-spacing: .04em;
+  text-shadow: 0 2px 5px rgba(0,0,0,.6);
+  margin-bottom: 6px;
+}
+#reflect-text {
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-shadow: 0 2px 6px rgba(0,0,0,.55);
+  min-height: 1.6em;
+}
+
+#reflect-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 12px;
+}
+.reflect-choice {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 1.02rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #FDF6E6;
+  background: rgba(255,255,255,.09);
+  border: 2px solid rgba(240,214,150,.45);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s;
+}
+.reflect-choice:hover {
+  background: rgba(255,255,255,.18);
+  border-color: rgba(240,214,150,.85);
+}
+.reflect-choice:active { transform: scale(.985); }
+#reflect-choices.locked .reflect-choice { pointer-events: none; opacity: .45; }
+
+#reflect-hint {
+  position: absolute;
+  right: 22px;
+  bottom: 8px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: rgba(253,246,230,.5);
+  animation: intro-blink 1.4s steps(1) infinite;
+}
+
+/* ── Closing title ────────────────────────────────────────────────── */
+#reflect-end {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.4s ease, visibility 1.4s;
+  pointer-events: none;
+}
+#reflect-end.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+
+#reflect-end-title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #F4EBD6;
+  letter-spacing: .16em;
+  text-shadow: 0 0 26px rgba(255,206,120,.5);
+}
+#reflect-end-sub {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(244,235,214,.7);
+}
+#reflect-replay-btn {
+  margin-top: 18px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1s ease, visibility 1s;
+}
+#reflect-replay-btn.visible { opacity: 1; visibility: visible; }
+
+/* ── Fade to black (into the reflection scene) ────────────────────── */
+#black-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 9996;
+  background: #000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+#black-fade.active { opacity: 1; }
+
+@media (max-width: 660px) {
+  #reflect-choices { grid-template-columns: 1fr; }
+  #reflect-portrait-wrap { width: 68px; height: 68px; }
+  #reflect-text { font-size: 1.12rem; }
+  #reflect-end-title { font-size: 1.9rem; }
+}
+
+/* ── ═══════════════════════════════════════════════════════════════
+   CONVERSATION SCENE  (visual-novel style, over the family photo)
+   ══════════════════════════════════════════════════════════════════ */
+#convo-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .45s ease, visibility .45s;
+}
+#convo-overlay.active { opacity: 1; visibility: visible; }
+
+#convo-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 10;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(16,22,44,.75);
+  border: 2px solid rgba(240,214,150,.55);
+  color: #FDF6E6;
+  font-size: 1.05rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+#convo-close-btn:hover  { background: rgba(30,40,72,.9); }
+#convo-close-btn:active { transform: scale(.94); }
+
+/* Framed speaker portrait, sitting above and overlapping the dialogue box.
+   The character art is transparent-background AI art that doesn't share
+   lighting/style with the scene photo, so it's presented as a portrait in
+   a frame (like the profile card and choose-phase cards) rather than a
+   bare cutout floating over the background. */
+#convo-portrait-frame {
+  position: absolute;
+  left: 50%;
+  bottom: 25%;
+  transform: translateX(-50%);
+  width: min(300px, 42vw);
+  height: 52vh;
+  max-height: 440px;
+  padding: 14px;
+  overflow: hidden;
+  background: #fff;
+  border: 3px solid rgba(240,214,150,.9);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 4px rgba(16,22,44,.85),
+    0 16px 40px rgba(0,0,0,.5);
+}
+#convo-portrait-frame.swap { animation: convo-swap .32s cubic-bezier(.22,1,.36,1) both; }
+@keyframes convo-swap {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px) scale(.97); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1);   }
+}
+#convo-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+/* The player's selfie is a real photo, not illustrated art — fill the
+   frame edge-to-edge (cover, no mat) instead of sitting on a card. */
+#convo-portrait-frame.is-player {
+  padding: 0;
+  background: #000;
+  height: 34vh;
+  bottom: 28%;
+}
+#convo-portrait-frame.is-player #convo-portrait { object-fit: cover; }
+
+/* ── Bottom dialogue box ──────────────────────────────────────────── */
+#convo-box {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  width: min(920px, calc(100% - 32px));
+  min-height: 27vh;
+  padding: 18px 26px 20px;
+  cursor: pointer;
+  color: #FDF6E6;
+  background: linear-gradient(to bottom, rgba(28,36,66,.96), rgba(14,20,40,.97));
+  border: 2px solid rgba(240,214,150,.75);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 4px rgba(14,20,40,.9),
+    0 14px 36px rgba(0,0,0,.55),
+    inset 0 0 26px rgba(120,150,220,.14);
+}
+#convo-box::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(240,214,150,.26);
+  border-radius: 11px;
+  pointer-events: none;
+}
+
+#convo-speaker {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #F0D696;
+  letter-spacing: .04em;
+  text-transform: capitalize;
+  text-shadow: 0 2px 5px rgba(0,0,0,.6);
+  margin-bottom: 8px;
+}
+
+#convo-text {
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.55;
+  text-shadow: 0 2px 6px rgba(0,0,0,.55);
+  min-height: 2.6em;
+}
+
+/* ── Answer buttons ───────────────────────────────────────────────── */
+#convo-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 12px;
+}
+.convo-answer {
+  width: 100%;
+  padding: 13px 20px;
+  text-align: left;
+  font-size: 1.12rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #FDF6E6;
+  background: rgba(255,255,255,.09);
+  border: 2px solid rgba(240,214,150,.45);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s;
+}
+.convo-answer:hover {
+  background: rgba(255,255,255,.18);
+  border-color: rgba(240,214,150,.85);
+}
+.convo-answer:active { transform: scale(.985); }
+.convo-answer.chosen {
+  background: var(--green);
+  border-color: #BBF7D0;
+  color: #fff;
+}
+#convo-answers.locked .convo-answer { pointer-events: none; }
+#convo-answers.locked .convo-answer:not(.chosen) { opacity: .45; }
+
+#convo-hint {
+  position: absolute;
+  right: 22px;
+  bottom: 10px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: rgba(253,246,230,.5);
+  animation: intro-blink 1.4s steps(1) infinite;
+}
+
+@media (max-width: 660px) {
+  #convo-portrait-frame { width: min(220px, 62vw); height: 38vh; bottom: 32%; }
+  #convo-portrait-frame.is-player { height: 24vh; }
+  #convo-text { font-size: 1.12rem; }
+  .convo-answer { font-size: 1rem; padding: 12px 16px; }
+}
+
 /* ── Camera flash overlay ─────────────────────────────────────────── */
 @keyframes camera-flash {
   0%   { opacity: 0; }
