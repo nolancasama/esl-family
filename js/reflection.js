@@ -18,10 +18,10 @@ const Reflection = (() => {
   ];
 
   const CHOICES = [
-    { emoji: '😊', text: "I'm happy." },
-    { emoji: '✨', text: "I'm excited." },
-    { emoji: '❤️', text: 'I like my new family.' },
-    { emoji: '🗺️', text: "I can't wait to explore tomorrow." },
+    { text: "I'm happy." },
+    { text: "I'm excited." },
+    { text: 'I like my new family.' },
+    { text: "I can't wait to explore tomorrow." },
   ];
 
   let els        = {};
@@ -93,7 +93,7 @@ const Reflection = (() => {
     CHOICES.forEach(c => {
       const btn = document.createElement('button');
       btn.className = 'reflect-choice';
-      btn.textContent = `${c.emoji} ${c.text}`;
+      btn.textContent = c.text;
       btn.addEventListener('click', () => choose(c));
       els.choices.appendChild(btn);
     });
