@@ -38,25 +38,20 @@ Open in **Chrome** (required for Web Speech API). Navigate to `http://localhost:
 
 ## Character art
 
-The app ships with **programmatically generated placeholder art** — no setup needed.
-Characters are drawn at runtime by `js/characters.js` using a seeded algorithm.
-Every character has a consistent full-body, front-facing design with transparent background.
-
-### Swapping in real art (optional)
-
-1. Prepare 100 PNG/WebP files:
-   - Names: `g01.png` … `g50.png` (generic), `i01.png` … `i50.png` (imaginative)
-   - 1024 × 1024 px, transparent background, full body, centered, no text/watermark
-2. Place files in `assets/characters/`
-3. In `assets/characters.json`, set each `"img"` field (path is relative to `index.html`, so it needs the `assets/` prefix):
-   ```json
-   { "id": "g01", "name": "Adult Woman", "category": "generic", "img": "assets/characters/g01.png" }
-   ```
-4. When `"img"` is set, the app uses your file instead of the generated placeholder.
+Every character in `assets/characters.json` ships with real hand-picked art in
+`assets/characters/` — there's no runtime generation or placeholder fallback.
+Each of the 6 family roles (Grandfather, Father, Brother, Grandmother, Mother,
+Sister) is scoped to its own fixed set of characters via `ROLE_CHAR_IDS` in
+`js/main.js`, so a given portrait only ever appears for one role.
 
 ### Adding new characters
 
-Append rows to `assets/characters.json`. The session pool always picks 6 generic + 6 imaginative at random.
+1. Add the PNG (transparent background, full body, centered) to `assets/characters/`.
+2. Append an entry to `assets/characters.json`:
+   ```json
+   { "id": "g99", "name": "New Character", "category": "generic", "gender": "female", "img": "assets/characters/g99.png" }
+   ```
+3. Add its `id` to the relevant role's list in `ROLE_CHAR_IDS` (`js/main.js`).
 
 ## File structure
 
@@ -66,18 +61,19 @@ esl-family/
   css/styles.css
   js/
     main.js          — app state machine
-    characters.js    — manifest + placeholder generator + session pool
+    intro.js         — text-only opening sequence (typewriter dialogue + name prompt)
+    characters.js    — manifest loading + shuffle/lookup helpers
     speech.js        — Web Speech API wrapper + role parsing
     recorder.js      — MediaRecorder audio capture
     selfie.js        — camera capture
     presentation.js  — auto-replay phase
     photo.js         — canvas family portrait compositor
   assets/
-    characters.json  — 100-character manifest (source of truth)
-    characters/      — (empty) drop real art PNG/WebP files here
+    characters.json  — character manifest (source of truth)
+    characters/      — character portrait art
+    frames/          — picture-frame art for the final photo screen
+    wallpaper.png     — backdrop texture for the final photo screen
     bodies/          — (empty) reserved for future body sprite assets
-  tools/
-    generate-placeholders.html  — optional: pre-bake 100 PNG files + updated manifest
 ```
 
 ## Browser support

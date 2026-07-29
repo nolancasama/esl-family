@@ -33,9 +33,9 @@
      PHASE 1 — CHOOSE YOUR FAMILY
 ═══════════════════════════════════════════════════════════════════ -->
 <div id="phase-choose" class="phase">
-  <div class="page-header">
+  <div id="choose-header-panel">
     <h1 id="choose-header">This is my grandfather.</h1>
-    <p>だれを えらぼうかな…？</p>
+    <p id="choose-subtitle">新しいおじいさんに会いましょう。</p>
   </div>
   <div class="page-body">
     <div id="choose-progress" class="choose-progress">
@@ -48,14 +48,33 @@
     </div>
     <div id="char-grid" class="char-grid"></div>
     <div class="choose-actions">
-      <button id="reroll-btn" class="btn btn-ghost btn-sm" aria-label="ほかのキャラクター" title="ほかのキャラクター">
+      <button id="reroll-btn" class="btn btn-ghost btn-sm" aria-label="ほかの人に会う" title="ほかの人に会う">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M23 4v6h-6"/>
           <path d="M1 20v-6h6"/>
           <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
         </svg>
-        <span>ほかのキャラクター</span>
+        <span>ほかの人に会う</span>
       </button>
+    </div>
+    <div id="family-lineup"></div>
+  </div>
+
+  <!-- Character profile card (slides in over the gallery on portrait click) -->
+  <div id="profile-overlay">
+    <div id="profile-card">
+      <div id="profile-left">
+        <img id="profile-portrait" src="" alt="">
+      </div>
+      <div id="profile-right">
+        <div id="profile-section">
+          <div id="profile-fields"></div>
+        </div>
+        <div id="profile-actions">
+          <button id="profile-back-btn" class="btn btn-ghost btn-lg">もどる</button>
+          <button id="profile-choose-btn" class="btn btn-primary btn-lg">この人にする</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -184,6 +203,7 @@
 <script src="js/presentation.js"></script>
 <script src="js/photo.js"></script>
 <script src="js/intro.js"></script>
+<script src="js/profile.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

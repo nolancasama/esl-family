@@ -10,6 +10,16 @@
   // Order family members are picked in, one at a time.
   const SELECT_ORDER = ['grandfather', 'father', 'brother', 'grandmother', 'mother', 'sister'];
 
+  // Japanese role names, used for the choose-screen narration line.
+  const ROLE_JP = {
+    grandfather: 'おじいさん',
+    father:      'おとうさん',
+    brother:     'おにいさん',
+    grandmother: 'おばあさん',
+    mother:      'おかあさん',
+    sister:      'おねえさん',
+  };
+
   // Real-art characters, scoped to a single role's choose step — never shown for any other role.
   const ROLE_CHAR_IDS = {
     brother:     ['g06', 'g08', 'g14', 'g27', 'i02', 'i14', 'i27', 'i41', 'i49'],
@@ -19,7 +29,6 @@
     mother:      ['g21', 'g24', 'g28', 'g37', 'g38', 'g46', 'i13', 'i23', 'i37', 'i48'],
     grandmother: ['g03', 'g30', 'g32', 'g36', 'g45', 'g49', 'i28', 'i35', 'i44', 'i46'],
   };
-  const ALL_SCOPED_CHAR_IDS = Object.values(ROLE_CHAR_IDS).flat();
 
   // How many candidates are shown per choose-phase screen.
   const POOL_SIZE = 3;
@@ -27,10 +36,9 @@
   // ── State ─────────────────────────────────────────────────────────
   const state = {
     pool:           [],   // candidates currently shown for the role being picked
-    rerollUsed:     false,
     roleIndex:      0,    // index into SELECT_ORDER for the choose phase
     pickedIds:      new Set(), // char ids already used by an earlier role
-    scopedList:     null,  // full shuffled candidate list for a scoped-art role, else null
+    scopedList:     null,  // full shuffled candidate list for the current role
     scopedPage:     0,     // current page (of POOL_SIZE) into scopedList
     selected:       [],   // 6 chars, in SELECT_ORDER order (set as choose phase proceeds)
     assignIndex:    0,    // index into selected[] / SELECT_ORDER currently being assigned
@@ -65,8 +73,20 @@
 
   // Choose phase
   const charGrid       = $('char-grid');
+  const familyLineup   = $('family-lineup');
+
+  // Character profile card
+  const profileOverlay = $('profile-overlay');
+  const profileCard    = $('profile-card');
+  const profilePortrait= $('profile-portrait');
+  const profileSection = $('profile-section');
+  const profileFields  = $('profile-fields');
+  const profileActions = $('profile-actions');
+  const profileBackBtn = $('profile-back-btn');
+  const profileChooseBtn = $('profile-choose-btn');
   const progressSegs   = Array.from(document.querySelectorAll('#choose-progress .progress-seg'));
   const chooseHeader   = $('choose-header');
+  const chooseSubtitle = $('choose-subtitle');
   const rerollBtn      = $('reroll-btn');
 
   // Assign phase
@@ -99,8 +119,19 @@
   // ── Boot ───────────────────────────────────────────────────────────
   const loadingScreen = $('loading-screen');
 
-  await Characters.load();
+  await Promise.all([Characters.load(), Profile.load()]);
   loadingScreen.style.display = 'none';
+
+  Profile.init({
+    overlay:   profileOverlay,
+    card:      profileCard,
+    portrait:  profilePortrait,
+    section:   profileSection,
+    fields:    profileFields,
+    actions:   profileActions,
+    backBtn:   profileBackBtn,
+    chooseBtn: profileChooseBtn,
+  });
 
   Presentation.init({
     charImg:  presCharImg,
@@ -136,34 +167,29 @@
     state.roleIndex      = 0;
     state.pickedIds       = new Set();
     state.selected        = [];
-    state.rerollUsed      = false;
     state.assignments     = {};
     state.selfieDataURL   = null;
     state.assignIndex     = 0;
+
+    Profile.close();
+    familyLineup.innerHTML = '';
 
     showPhase('choose');
     loadChooseStep();
   }
 
   function loadChooseStep() {
-    const role     = SELECT_ORDER[state.roleIndex];
-    const gender   = Speech.ROLE_GENDER[role];
+    const role      = SELECT_ORDER[state.roleIndex];
     const scopedIds = ROLE_CHAR_IDS[role];
 
-    if (scopedIds) {
-      state.scopedList = Characters.shuffle(
-        Characters.getAll().filter(c => scopedIds.includes(c.id) && !state.pickedIds.has(c.id))
-      );
-      state.scopedPage = 0;
-      state.pool = state.scopedList.slice(0, POOL_SIZE);
-    } else {
-      state.scopedList = null;
-      const exclude = new Set([...state.pickedIds, ...ALL_SCOPED_CHAR_IDS]);
-      state.pool = Characters.buildGenderedPool(gender, POOL_SIZE, exclude);
-    }
-    state.rerollUsed = false;
+    state.scopedList = Characters.shuffle(
+      Characters.getAll().filter(c => scopedIds.includes(c.id) && !state.pickedIds.has(c.id))
+    );
+    state.scopedPage = 0;
+    state.pool = state.scopedList.slice(0, POOL_SIZE);
 
     chooseHeader.textContent = `This is my ${role}.`;
+    chooseSubtitle.textContent = `新しい${ROLE_JP[role]}に会いましょう。`;
     progressSegs.forEach((seg, i) => {
       seg.classList.toggle('done', i < state.roleIndex);
       seg.classList.toggle('active', i === state.roleIndex);
@@ -175,10 +201,14 @@
 
   function renderPool() {
     charGrid.innerHTML = '';
-    state.pool.forEach(char => {
+    state.pool.forEach((char, i) => {
       const card = document.createElement('div');
       card.className = 'char-card';
       card.dataset.id = char.id;
+      // Stagger the entrance, and vary the idle rhythm so the portraits
+      // don't breathe in lockstep.
+      card.style.setProperty('--enter-delay', `${i * 130}ms`);
+      card.style.setProperty('--idle-dur', `${3.6 + i * 0.45}s`);
 
       const imgEl = new Image();
       imgEl.src = Characters.imgUrl(char);
@@ -190,13 +220,40 @@
     });
   }
 
+  // Tapping a portrait opens its profile card first — the character is only
+  // added to the family once the player confirms with 「この人にする」.
   function pickCharacter(char, cardEl) {
+    if (cardEl.classList.contains('picking')) return;
+
+    // Let the tap land visibly (glow + enlarge + blip) before the profile
+    // slides in, rather than snapping straight to the next screen.
+    cardEl.classList.add('picking');
+    Sfx.select();
+
+    setTimeout(() => {
+      Profile.open(char, Characters.imgUrl(char), {
+        onBack:    () => cardEl.classList.remove('picking'),
+        onConfirm: () => {
+          cardEl.classList.remove('picking');
+          confirmCharacter(char, cardEl);
+        },
+      });
+    }, 320);
+  }
+
+  function confirmCharacter(char, cardEl) {
     const role = SELECT_ORDER[state.roleIndex];
-    cardEl.classList.add('selected');
     state.pickedIds.add(char.id);
     state.selected.push(char);
 
-    // Briefly show the pick, then advance to the next role (or finish).
+    // Highlight the chosen portrait and stamp a checkmark on it.
+    cardEl.classList.add('selected');
+    cardEl.appendChild(makeCheckmark());
+
+    addToLineup(char, role);
+    Profile.say(`This is my ${role}.`);
+
+    // Let the checkmark and grammar line land, then move on.
     setTimeout(() => {
       state.roleIndex++;
       if (state.roleIndex < SELECT_ORDER.length) {
@@ -204,38 +261,45 @@
       } else {
         enterAssignPhase();
       }
-    }, 300);
+    }, 1700);
+  }
+
+  function makeCheckmark() {
+    const badge = document.createElement('div');
+    badge.className = 'card-check';
+    badge.innerHTML =
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">' +
+      '<polyline points="20 6 9 17 4 12"/></svg>';
+    return badge;
+  }
+
+  function addToLineup(char, role) {
+    const item = document.createElement('div');
+    item.className = 'lineup-member';
+    const img = new Image();
+    img.src = Characters.imgUrl(char);
+    img.alt = role;
+    const label = document.createElement('span');
+    label.textContent = role;
+    item.appendChild(img);
+    item.appendChild(label);
+    familyLineup.appendChild(item);
   }
 
   function updateChooseUI() {
-    if (state.scopedList) {
-      // Only show reroll if there are more candidates than fit on one page.
-      rerollBtn.style.display = state.scopedList.length > POOL_SIZE ? '' : 'none';
-      rerollBtn.disabled = false;
-    } else {
-      rerollBtn.style.display = '';
-      rerollBtn.disabled = state.rerollUsed;
-    }
+    // Only show reroll if there are more candidates than fit on one page.
+    rerollBtn.style.display = state.scopedList.length > POOL_SIZE ? '' : 'none';
+    rerollBtn.disabled = false;
   }
 
   rerollBtn.addEventListener('click', () => {
-    if (state.scopedList) {
-      // Page through the fixed set in batches of 3, wrapping around.
-      const pageCount = Math.ceil(state.scopedList.length / POOL_SIZE);
-      state.scopedPage = (state.scopedPage + 1) % pageCount;
-      const start = state.scopedPage * POOL_SIZE;
-      state.pool = state.scopedList.slice(start, start + POOL_SIZE);
-      renderPool();
-      return;
-    }
-    if (state.rerollUsed) return;
-    state.rerollUsed = true;
-    const role   = SELECT_ORDER[state.roleIndex];
-    const gender = Speech.ROLE_GENDER[role];
-    const exclude = new Set([...state.pickedIds, ...ALL_SCOPED_CHAR_IDS]);
-    state.pool = Characters.buildGenderedPool(gender, POOL_SIZE, exclude);
+    // Page through the fixed set in batches of POOL_SIZE, wrapping around.
+    const pageCount = Math.ceil(state.scopedList.length / POOL_SIZE);
+    state.scopedPage = (state.scopedPage + 1) % pageCount;
+    const start = state.scopedPage * POOL_SIZE;
+    state.pool = state.scopedList.slice(start, start + POOL_SIZE);
     renderPool();
-    updateChooseUI();
   });
 
   function capitalize(s) {

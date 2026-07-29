@@ -212,6 +212,69 @@ html, body {
 /* ── ═══════════════════════════════════════════════════════════════
    PHASE 1 — CHOOSE
    ══════════════════════════════════════════════════════════════════ */
+
+/* ── Sense of place: a warm, softly-lit room ───────────────────────
+   Built from layered gradients over the same floral wallpaper used on
+   the final family-photo wall, so the room the player meets everyone in
+   is the room their portraits end up hanging in. Static, and darkened
+   toward the edges so the portraits stay the visual focus. */
+#phase-choose.active {
+  position: relative;
+  background-color: #1A2440;
+  background-image:
+    /* vignette — darkens the edges so the portrait cards stay the focus */
+    radial-gradient(ellipse 120% 85% at 50% 40%,
+      rgba(0,0,0,0) 25%, rgba(10,14,28,.5) 75%, rgba(6,9,20,.78) 100%),
+    /* gentle overall darken for contrast against the white cards */
+    linear-gradient(rgba(8,10,22,.25), rgba(8,10,22,.25)),
+    /* illustrated castle/village scene */
+    url('../assets/choose-bg.jpg');
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: cover, cover, cover;
+  background-position: center, center, center;
+}
+
+/* ── JRPG-style title panel ───────────────────────────────────────── */
+#choose-header-panel {
+  position: relative;
+  margin: 18px auto 4px;
+  padding: 14px 34px 15px;
+  max-width: 640px;
+  width: calc(100% - 32px);
+  text-align: center;
+  color: #FDF6E6;
+  background:
+    linear-gradient(to bottom, rgba(28,36,66,.95), rgba(16,22,44,.95));
+  border: 2px solid rgba(240,214,150,.75);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 4px rgba(16,22,44,.9),          /* outer dark rim */
+    0 10px 28px rgba(0,0,0,.5),
+    inset 0 0 22px rgba(120,150,220,.16); /* soft inner glow */
+}
+/* thin inset gold hairline, classic JRPG window trim */
+#choose-header-panel::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(240,214,150,.28);
+  border-radius: 9px;
+  pointer-events: none;
+}
+#choose-header-panel h1 {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+  text-shadow: 0 2px 6px rgba(0,0,0,.6);
+}
+#choose-subtitle {
+  margin-top: 6px;
+  font-size: .95rem;
+  font-weight: 600;
+  color: rgba(253,246,230,.82);
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+
 .choose-progress {
   display: flex;
   justify-content: center;
@@ -236,6 +299,10 @@ html, body {
   margin: 12px 0;
 }
 
+/* Cards fade+rise in one after another (delay set per-card from JS), then
+   settle into a barely-there idle float so the characters feel alive.
+   Entrance uses `transform`, idle uses the inner image, and hover/tap use
+   the standalone `scale` property — so none of the three fight each other. */
 .char-card {
   width: 288px;
   background: var(--card-bg);
@@ -245,16 +312,37 @@ html, body {
   text-align: center;
   cursor: pointer;
   border: 3px solid transparent;
-  transition: border-color .15s, transform .15s, box-shadow .15s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  animation: card-enter .55s cubic-bezier(.22,1,.36,1) both;
+  animation-delay: var(--enter-delay, 0ms);
+  transition: border-color .18s, box-shadow .25s, background .18s, scale .22s cubic-bezier(.34,1.56,.64,1);
 }
-.char-card:hover  { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.char-card:hover {
+  scale: 1.03;
+  box-shadow: 0 10px 28px rgba(0,0,0,.3);
+}
+
+/* Tap feedback — enlarge with a warm glow before the profile opens */
+.char-card.picking {
+  scale: 1.07;
+  border-color: var(--yellow);
+  box-shadow:
+    0 0 0 5px rgba(251,191,36,.4),
+    0 0 34px 8px rgba(251,191,36,.55),
+    0 14px 34px rgba(0,0,0,.35);
+}
+
 .char-card.selected {
   border-color: var(--orange);
   background: #FFF7ED;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(249,115,22,.3);
+  scale: 1.03;
+  box-shadow: 0 8px 24px rgba(249,115,22,.35);
 }
 
 .char-card canvas,
@@ -264,6 +352,12 @@ html, body {
   object-fit: contain;
   display: block;
   margin: 0 auto 6px;
+  animation: portrait-idle var(--idle-dur, 4s) ease-in-out infinite;
+  animation-delay: var(--enter-delay, 0ms);
+}
+@keyframes portrait-idle {
+  0%, 100% { transform: translateY(0)     scale(1);     }
+  50%      { transform: translateY(-2px)  scale(1.006); }
 }
 
 .choose-actions {
@@ -272,6 +366,155 @@ html, body {
   gap: 12px;
   justify-content: center;
   padding: 12px 0 20px;
+}
+
+/* Chosen-so-far family lineup, grows as each member is confirmed */
+#family-lineup {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 4px 0 24px;
+  min-height: 8px;
+}
+.lineup-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  animation: lineup-pop .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+.lineup-member img {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  object-position: 50% 12%;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--teal);
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.lineup-member span {
+  font-size: .62rem;
+  font-weight: 800;
+  color: rgba(253,246,230,.85);
+  text-shadow: 0 1px 3px rgba(0,0,0,.6);
+  text-transform: capitalize;
+}
+@keyframes lineup-pop {
+  from { opacity: 0; transform: scale(.4) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Checkmark stamped on a card the moment it is confirmed */
+.char-card { position: relative; }
+.char-card .card-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,.28);
+  animation: lineup-pop .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* ── ═══════════════════════════════════════════════════════════════
+   PHASE 1b — CHARACTER PROFILE CARD
+   ══════════════════════════════════════════════════════════════════ */
+#profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(12, 16, 28, .72);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .3s ease, visibility .3s;
+}
+#profile-overlay.active { opacity: 1; visibility: visible; }
+
+#profile-card {
+  display: flex;
+  align-items: stretch;
+  gap: 28px;
+  background: var(--card-bg);
+  border-radius: 28px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.4);
+  width: 100%;
+  max-width: 780px;
+  max-height: 92vh;
+  overflow: hidden;
+  padding: 24px 28px;
+  text-align: left;
+  transform: translateX(60px);
+  opacity: 0;
+  transition: transform .4s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+}
+#profile-overlay.active #profile-card { transform: translateX(0); opacity: 1; }
+
+#profile-left { flex-shrink: 0; }
+
+#profile-portrait {
+  width: 240px;
+  height: 336px;
+  object-fit: contain;
+  display: block;
+  animation: portrait-zoom .5s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes portrait-zoom {
+  from { transform: scale(.8); opacity: 0; }
+  to   { transform: scale(1);  opacity: 1; }
+}
+
+#profile-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── プロフィール section ──────────────────────────────────────────── */
+.profile-field {
+  font-size: 1.04rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.profile-field:first-child { margin-top: 0; }
+.profile-field strong {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+/* ── Action buttons ────────────────────────────────────────────────── */
+#profile-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: auto; /* bottom-align with the portrait to the left */
+}
+#profile-actions .btn { flex: 1; padding: 14px 16px; font-size: 1rem; }
+
+@media (max-width: 660px) {
+  #profile-card {
+    flex-direction: column;
+    align-items: center;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  #profile-portrait { width: 200px; height: 280px; }
+  #profile-right { width: 100%; }
 }
 
 /* ── ═══════════════════════════════════════════════════════════════
