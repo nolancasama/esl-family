@@ -920,6 +920,27 @@ html, body {
   50%      { transform: translate(-50%, calc(-100% - 20px)); }
 }
 
+#completion-marks {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
+.photo-complete-mark {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,.28);
+  transform: translate(-50%, -50%);
+  animation: lineup-pop .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+
 /* ── Player-portrait glow, once every family member has been talked to ──
    JS anchors this over the "me" frame; the star bobs just above it. */
 #me-glow {

@@ -116,6 +116,7 @@
   const downloadBtn    = $('download-btn');
   const playAgainBtn   = $('play-again-btn');
   const hintBubble     = $('hint-bubble');
+  const completionMarks= $('completion-marks');
   const meGlow         = $('me-glow');
   const blackFade      = $('black-fade');
 
@@ -207,6 +208,7 @@
     Conversation.close();
     Reflection.close();
     stopHintRotation();
+    clearCompletionMarks();
     hideMeGlow();
 
     showPhase('choose');
@@ -575,6 +577,7 @@
     // Frames pop in one at a time, the student's own photo last.
     await Photo.compose(photoCanvas, state.assignments, state.selfieDataURL, state.playerName);
 
+    refreshCompletionMarks();
     startHintRotation();
   }
 
@@ -591,8 +594,12 @@
   }
 
   function hintCycle() {
-    const keys = Object.keys(state.assignments);
-    if (keys.length === 0) { _hintTimer = null; return; }
+    const keys = unfinishedTalkRoles();
+    if (keys.length === 0) {
+      _hintTimer = null;
+      hintBubble.classList.remove('visible');
+      return;
+    }
 
     let next = keys[Math.floor(Math.random() * keys.length)];
     if (keys.length > 1 && next === _hintKey) {
@@ -624,8 +631,36 @@
 
   window.addEventListener('resize', () => {
     if (_hintKey) positionHint(_hintKey);
+    refreshCompletionMarks();
     if (meGlow.classList.contains('visible')) refreshMeGlow();
   });
+
+  function unfinishedTalkRoles() {
+    return Object.keys(state.assignments).filter(role => !state.talkedTo.has(role));
+  }
+
+  function refreshCompletionMarks() {
+    clearCompletionMarks();
+    Object.keys(state.assignments)
+      .filter(role => state.talkedTo.has(role))
+      .forEach(role => {
+        const rect = Photo.getCardScreenRect(photoCanvas, role);
+        if (!rect) return;
+        const mark = document.createElement('div');
+        mark.className = 'photo-complete-mark';
+        mark.innerHTML =
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+          'stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">' +
+          '<polyline points="20 6 9 17 4 12"/></svg>';
+        mark.style.left = `${rect.left + rect.width - 10}px`;
+        mark.style.top  = `${rect.top + 10}px`;
+        completionMarks.appendChild(mark);
+      });
+  }
+
+  function clearCompletionMarks() {
+    completionMarks.innerHTML = '';
+  }
 
   // ── Player-portrait glow: appears once every family member has been met ──
   function allFamilyTalkedTo() {
@@ -680,6 +715,7 @@
       state.playerName,
       () => {
         state.talkedTo.add(key);
+        refreshCompletionMarks();
         startHintRotation();
         refreshMeGlow();
       },
@@ -692,6 +728,7 @@
   // ══════════════════════════════════════════════════════════════════
   function enterReflection() {
     // Fade to black, swap scenes behind the curtain, then fade back in.
+    clearCompletionMarks();
     blackFade.classList.add('active');
     setTimeout(() => {
       Reflection.start(state.selfieDataURL, state.playerName);
@@ -783,6 +820,7 @@
   function debugSkipPhotoPhase() {
     stopHintRotation();
     Object.keys(state.assignments).forEach(role => state.talkedTo.add(role));
+    refreshCompletionMarks();
     refreshMeGlow();
     hideMeGlow();
     enterReflection();
