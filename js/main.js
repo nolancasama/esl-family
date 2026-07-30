@@ -66,7 +66,6 @@
   // Intro phase
   const introSkipBtn   = $('intro-skip-btn');
   const introTapZone   = $('intro-tap-zone');
-  const introSpeaker   = $('intro-speaker');
   const introLine      = $('intro-line');
   const introHint      = $('intro-hint');
   const introYesBtn    = $('intro-yes-btn');
@@ -173,7 +172,6 @@
 
   Intro.init({
     tapZone:   introTapZone,
-    speaker:   introSpeaker,
     lineEl:    introLine,
     hint:      introHint,
     yesBtn:    introYesBtn,

@@ -61,9 +61,8 @@ const Intro = (() => {
     els.inputWrap.style.display = 'none';
     // The tap-to-advance hint only applies to plain lines, not button/input steps.
     els.hint.style.display = (step.button || step.input) ? 'none' : '';
-    els.speaker.textContent = step.speaker || '';
-
-    const text = step.name ? `「ようこそ、${playerName}。」` : step.text;
+    const line = step.name ? `「ようこそ、${playerName}。」` : step.text;
+    const text = step.speaker ? `${step.speaker}：\n${line}` : line;
 
     typeLine(text, () => {
       if (step.button)      { els.yesBtn.style.display = ''; }
