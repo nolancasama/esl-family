@@ -739,15 +739,23 @@ html, body {
 }
 
 #selfie-actions {
+  --selfie-side-button-w: 144px;
+  --selfie-action-gap: 24px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: var(--selfie-side-button-w) auto var(--selfie-side-button-w);
   align-items: center;
-  column-gap: 14px;
+  justify-content: center;
+  column-gap: var(--selfie-action-gap);
   width: 100%;
-  max-width: min(390px, calc(100vw - 32px));
+  max-width: min(540px, calc(100vw - 32px));
 }
-#selfie-actions #retake-btn      { justify-self: start; }
-#selfie-actions #selfie-next-btn { justify-self: end; }
+#selfie-actions #retake-btn,
+#selfie-actions #selfie-next-btn {
+  width: 100%;
+  min-width: 0;
+}
+#selfie-actions #retake-btn      { justify-self: end; }
+#selfie-actions #selfie-next-btn { justify-self: start; }
 
 #snap-btn {
   justify-self: center;
@@ -773,8 +781,9 @@ html, body {
 
 @media (max-width: 420px) {
   #selfie-actions {
-    column-gap: 10px;
-    max-width: calc(100vw - 24px);
+    --selfie-side-button-w: clamp(92px, 28vw, 118px);
+    --selfie-action-gap: 14px;
+    max-width: calc(100vw - 16px);
   }
   #selfie-actions .btn {
     padding-left: 12px;

@@ -646,14 +646,17 @@
       .forEach(role => {
         const rect = Photo.getCardScreenRect(photoCanvas, role);
         if (!rect) return;
+        const markSize = 40;
+        const markPadding = 10;
+        const markCenterInset = markSize / 2 + markPadding;
         const mark = document.createElement('div');
         mark.className = 'photo-complete-mark';
         mark.innerHTML =
           '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
           'stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">' +
           '<polyline points="20 6 9 17 4 12"/></svg>';
-        mark.style.left = `${rect.left + rect.width - 24}px`;
-        mark.style.top  = `${rect.top + 24}px`;
+        mark.style.left = `${rect.left + rect.width - markCenterInset}px`;
+        mark.style.top  = `${rect.top + markCenterInset}px`;
         completionMarks.appendChild(mark);
       });
   }
