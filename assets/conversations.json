@@ -1,6 +1,6 @@
 {
   "grandfather": {
-    "bg": "assets/yard-bg.jpg",
+    "bg": "assets/study-bg.jpg",
     "greeting": "Hello! Come and sit with me.",
     "questions": [
       {
@@ -300,7 +300,7 @@
     "farewell": "Thank you for talking with me. Dinner is almost ready!"
   },
   "brother": {
-    "bg": "assets/yard-bg.jpg",
+    "bg": "assets/stable-bg.png",
     "greeting": "Hi! Do you want to play with me?",
     "questions": [
       {
