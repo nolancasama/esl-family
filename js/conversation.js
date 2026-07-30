@@ -51,6 +51,7 @@ const Conversation = (() => {
       advanceDialogueNow();
     });
     els.closeBtn.addEventListener('click', () => finish());
+    document.addEventListener('keydown', handleKeyAdvance);
   }
 
   function isOpen() { return _open; }
@@ -202,6 +203,13 @@ const Conversation = (() => {
     clearTimeout(_timer);
     els.hint.style.display = 'none';
     go();
+  }
+
+  function handleKeyAdvance(e) {
+    if (!_open || (e.key !== ' ' && e.key !== 'Enter')) return;
+    if (e.target.closest && e.target.closest('.convo-answer, #convo-close-btn')) return;
+    e.preventDefault();
+    advanceDialogueNow();
   }
 
   function isAutoCloseLine(text) {
