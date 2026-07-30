@@ -194,6 +194,16 @@ html, body {
 }
 #intro-name-input::placeholder { color: rgba(255,255,255,.4); }
 #intro-name-input:focus { border-color: var(--blue); }
+#intro-name-error {
+  display: none;
+  color: #FDE68A;
+  font-size: .9rem;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  white-space: pre-line;
+}
+#intro-name-error.visible { display: block; }
 #intro-name-input.shake { animation: intro-shake .4s; }
 @keyframes intro-shake {
   0%, 100% { transform: translateX(0); }

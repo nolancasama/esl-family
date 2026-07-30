@@ -72,6 +72,7 @@
   const introYesBtn    = $('intro-yes-btn');
   const introInputWrap = $('intro-input-wrap');
   const introNameInput = $('intro-name-input');
+  const introNameError = $('intro-name-error');
   const introNextBtn   = $('intro-next-btn');
 
   // Choose phase
@@ -179,6 +180,7 @@
     yesBtn:    introYesBtn,
     inputWrap: introInputWrap,
     nameInput: introNameInput,
+    nameError: introNameError,
     nextBtn:   introNextBtn,
     skipBtn:   introSkipBtn,
   });

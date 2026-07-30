@@ -35,12 +35,30 @@ const Intro = (() => {
   let playerName = '';
   let completeCurrent = () => {};
 
+  const MAX_NAME_LENGTH = 16;
+
+  // Kept private so the game never reveals which term caused a retry.
+  const ENGLISH_BLOCKLIST = [
+    'fuck', 'shit', 'bitch', 'bastard', 'asshole', 'dick', 'cock', 'cunt',
+    'pussy', 'sex', 'porn', 'nude', 'boob', 'penis', 'vagina', 'whore',
+    'slut', 'rape', 'nigger', 'faggot', 'retard', 'idiot', 'stupid',
+    'loser', 'moron', 'wtf'
+  ];
+  const JAPANESE_BLOCKLIST = [
+    'くそ', 'うんこ', 'ちんこ', 'ちんちん', 'まんこ', 'おっぱい',
+    'せっくす', 'えっち', 'ぽるの', 'ぬーど', 'ばか', 'あほ', 'しね',
+    'ころす', 'きもい', 'ぶす', 'でぶ', 'やりまん', 'きちがい',
+    'めくら', 'つんぼ', 'かたわ'
+  ];
+  const JAPANESE_KANJI_BLOCKLIST = ['死ね', '殺す', '馬鹿'];
+
   function init(elements) {
     els = elements;
     els.tapZone.addEventListener('click', handleTap);
     els.yesBtn.addEventListener('click', () => advance());
     els.nextBtn.addEventListener('click', submitName);
     els.nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitName(); });
+    els.nameInput.addEventListener('input', hideNameError);
     els.skipBtn.addEventListener('click', skip);
     document.addEventListener('keydown', handleKey);
   }
@@ -50,6 +68,7 @@ const Intro = (() => {
     stepIndex  = 0;
     playerName = '';
     els.nameInput.value = '';
+    hideNameError();
     showStep(0);
   }
 
@@ -118,15 +137,70 @@ const Intro = (() => {
   }
 
   function submitName() {
-    const name = els.nameInput.value.trim().slice(0, 20);
-    if (!name) {
-      els.nameInput.classList.remove('shake');
-      void els.nameInput.offsetWidth;
-      els.nameInput.classList.add('shake');
+    const result = validateName(els.nameInput.value);
+    els.nameInput.value = result.name;
+    if (!result.valid) {
+      showNameError();
+      shakeNameInput();
       return;
     }
-    playerName = name;
+    hideNameError();
+    playerName = result.name;
     advance();
+  }
+
+  function validateName(value) {
+    // NFKC folds half-width/full-width characters into one form. Internal
+    // whitespace is made consistent, then only this cleaned name is stored.
+    const name = String(value || '').normalize('NFKC').trim().replace(/\s+/g, ' ');
+    if (!name || [...name].length > MAX_NAME_LENGTH) return { valid: false, name };
+    if (isKeyboardMash(name)) return { valid: false, name };
+    if (containsBlockedEnglish(name) || containsBlockedJapanese(name)) return { valid: false, name };
+    return { valid: true, name };
+  }
+
+  function containsBlockedEnglish(name) {
+    const leet = name.toLowerCase()
+      .replace(/[@4]/g, 'a').replace(/[3]/g, 'e').replace(/[1!|]/g, 'i')
+      .replace(/[0]/g, 'o').replace(/[$5]/g, 's').replace(/[7+]/g, 't')
+      .replace(/[8]/g, 'b');
+    const compact = leet.replace(/[^a-z]/g, '').replace(/(.)\1+/g, '$1');
+    return ENGLISH_BLOCKLIST.some(term => compact.includes(term));
+  }
+
+  function containsBlockedJapanese(name) {
+    const compact = toHiragana(name).replace(/[\s\p{P}\p{S}]/gu, '').replace(/(.)\1+/g, '$1');
+    return JAPANESE_BLOCKLIST.some(term => compact.includes(term)) ||
+      JAPANESE_KANJI_BLOCKLIST.some(term => name.includes(term));
+  }
+
+  function toHiragana(value) {
+    return value.replace(/[\u30A1-\u30F6]/g, char =>
+      String.fromCharCode(char.charCodeAt(0) - 0x60));
+  }
+
+  function isKeyboardMash(name) {
+    const compact = name.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
+    if (/^(.)\1{5,}$/u.test(compact)) return true;
+    return /^(?:asdf|qwer|zxcv|hjkl|poiuy|lkjh|mnbv){2,}$/i.test(compact);
+  }
+
+  function showNameError() {
+    if (!els.nameError) return;
+    els.nameError.textContent = 'ごめんなさい。\nこの名前は使えません。\nちがう名前を入力してください。';
+    els.nameError.classList.add('visible');
+  }
+
+  function hideNameError() {
+    if (!els.nameError) return;
+    els.nameError.textContent = '';
+    els.nameError.classList.remove('visible');
+  }
+
+  function shakeNameInput() {
+    els.nameInput.classList.remove('shake');
+    void els.nameInput.offsetWidth;
+    els.nameInput.classList.add('shake');
   }
 
   function skip() {

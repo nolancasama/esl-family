@@ -23,7 +23,8 @@
     <div id="intro-hint">タップ</div>
     <button id="intro-yes-btn" class="btn btn-primary btn-lg intro-control" style="display:none;">はい</button>
     <div id="intro-input-wrap" class="intro-control" style="display:none;">
-      <input id="intro-name-input" type="text" maxlength="20" placeholder="なまえ" autocomplete="off">
+      <input id="intro-name-input" type="text" maxlength="16" placeholder="なまえ" autocomplete="off" aria-describedby="intro-name-error">
+      <p id="intro-name-error" role="alert" aria-live="polite"></p>
       <button id="intro-next-btn" class="btn btn-primary btn-lg">つぎへ</button>
     </div>
   </div>
