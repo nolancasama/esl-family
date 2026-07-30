@@ -237,6 +237,20 @@ html, body {
 #phase-choose.active       { --scene-img: url('../assets/choose-bg.jpg'); }
 #phase-selfie.active       { --scene-img: url('../assets/selfie-bg.jpg'); }
 #phase-presentation.active { --scene-img: url('../assets/presentation-bg.jpg'); }
+/* On the first arrival after the intro, let the player take in the original
+   selection-scene artwork before the interface and its dark vignette appear. */
+#phase-choose.active.intro-linger {
+  background-image: var(--scene-img);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+#phase-choose.intro-linger > .rpg-header-panel,
+#phase-choose.intro-linger > .page-body {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 /* ── JRPG-style title panel ───────────────────────────────────────── */
 .rpg-header-panel {

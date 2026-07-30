@@ -9,6 +9,8 @@
 
   // Order family members are picked in, one at a time.
   const SELECT_ORDER = ['grandfather', 'father', 'brother', 'grandmother', 'mother', 'sister'];
+  const CHOOSE_INTRO_LINGER_MS = 2500;
+  const SCENE_FADE_MS = 500;
 
   // Japanese role names, used for the choose-screen narration line.
   const ROLE_JP = {
@@ -48,8 +50,10 @@
     playerName:     '',
     talkedTo:       new Set(), // roles the player has finished a conversation with
     conversationIntroduced: new Set(), // roles that have shown the first-time background linger
+    chooseIntroSeen: false,
     phase:          '',
   };
+  let chooseIntroLingerTimer = null;
 
   // ── DOM refs ───────────────────────────────────────────────────────
   const $ = id => document.getElementById(id);
@@ -215,8 +219,22 @@
     clearCompletionMarks();
     hideMeGlow();
 
+    const showIntroLinger = !state.chooseIntroSeen;
+    state.chooseIntroSeen = true;
+    clearTimeout(chooseIntroLingerTimer);
+
     showPhase('choose');
+    phases.choose.classList.toggle('intro-linger', showIntroLinger);
     loadChooseStep();
+
+    if (showIntroLinger) {
+      // The scene-fade needs to clear first, then leave the untouched artwork
+      // on-screen for the same 2.5-second reading pause as conversations.
+      chooseIntroLingerTimer = setTimeout(() => {
+        phases.choose.classList.remove('intro-linger');
+        chooseIntroLingerTimer = null;
+      }, SCENE_FADE_MS + CHOOSE_INTRO_LINGER_MS);
+    }
   }
 
   function loadChooseStep() {
@@ -865,7 +883,7 @@
     setTimeout(() => {
       midCallback();
       requestAnimationFrame(() => overlay.classList.remove('active'));
-    }, 500);
+    }, SCENE_FADE_MS);
   }
 
   function showFeedback(msg, type) {
