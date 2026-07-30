@@ -11,10 +11,10 @@
 const Reflection = (() => {
 
   const MONOLOGUE = [
-    'I had a wonderful day.',
-    'I met my new family.',
-    'Everyone was so kind.',
-    'How do I feel?',
+    { text: 'I had a wonderful day.', ja: 'すてきな一日だった。' },
+    { text: 'I met my new family.', ja: '新しい家族に会った。' },
+    { text: 'Everyone was so kind.', ja: 'みんなとてもやさしかった。' },
+    { text: 'How do I feel?', ja: 'どんな気持ち？' },
   ];
 
   const CHOICES = [
@@ -76,14 +76,33 @@ const Reflection = (() => {
   function step(i) {
     if (i >= MONOLOGUE.length) { showChoices(); return; }
     const line = MONOLOGUE[i];
-    els.text.textContent = line;
-    say(line);
+    const text = renderReflectionText(line);
+    say(text);
     els.hint.style.display = '';
     _advance = () => step(i + 1);
     clearTimeout(_timer);
     _timer = setTimeout(() => {
       if (_advance) { _advance = null; step(i + 1); }
-    }, Math.max(2400, line.length * 95));
+    }, Math.max(2400, text.length * 95));
+  }
+
+  function renderReflectionText(line) {
+    const text = typeof line === 'string' ? line : line.text;
+    els.text.innerHTML = '';
+
+    const english = document.createElement('div');
+    english.className = 'reflect-en';
+    english.textContent = text;
+    els.text.appendChild(english);
+
+    if (line.ja) {
+      const japanese = document.createElement('div');
+      japanese.className = 'reflect-ja';
+      japanese.textContent = line.ja;
+      els.text.appendChild(japanese);
+    }
+
+    return text;
   }
 
   function showChoices() {
