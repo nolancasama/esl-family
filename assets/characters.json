@@ -447,6 +447,7 @@
     "category": "fantasy",
     "gender": "female",
     "img": "assets/characters/m51.png",
+    "transparent": true,
     "fullBody": true
   }
 ]

@@ -142,17 +142,20 @@ html, body {
 }
 
 #intro-speaker {
+  align-self: flex-start;
   min-height: 1.6em;
-  padding: 5px 14px 6px;
+  margin: 0 0 -24px 8px;
+  padding: 6px 15px 7px;
   border: 1px solid rgba(240,214,150,.38);
-  border-radius: 999px;
-  background: rgba(16,22,44,.42);
+  border-radius: 12px 12px 12px 4px;
+  background: rgba(16,22,44,.62);
   color: rgba(253,246,230,.84);
   font-size: .86rem;
   font-weight: 800;
   letter-spacing: .08em;
-  text-align: center;
+  text-align: left;
   text-shadow: 0 1px 4px rgba(0,0,0,.55);
+  box-shadow: 0 5px 16px rgba(0,0,0,.22);
 }
 
 #intro-line {
@@ -285,10 +288,11 @@ html, body {
 
 .char-grid {
   display: grid;
-  grid-template-columns: repeat(3, 288px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   justify-content: center;
-  gap: 12px;
-  margin: 20px 0 12px;
+  gap: clamp(8px, 1.4vw, 12px);
+  width: min(900px, calc(100% - 24px));
+  margin: 20px auto 12px;
 }
 
 /* Cards fade+rise in one after another (delay set per-card from JS), then
@@ -296,7 +300,8 @@ html, body {
    Entrance uses `transform`, idle uses the inner image, and hover/tap use
    the standalone `scale` property — so none of the three fight each other. */
 .char-card {
-  width: 288px;
+  width: 100%;
+  min-width: 0;
   background: var(--card-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -340,8 +345,8 @@ html, body {
 
 .char-card canvas,
 .char-card img {
-  width: 240px;
-  height: 336px;
+  width: min(240px, 100%);
+  height: clamp(230px, 34vw, 336px);
   object-fit: contain;
   display: block;
   margin: 0 auto 6px;
@@ -367,89 +372,6 @@ html, body {
   padding: 12px 0 20px;
 }
 
-/* Family progress tray: chosen portraits and current role in one strip */
-#family-lineup {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  padding: 16px 16px 12px;
-  margin: 4px auto 8px;
-  max-width: 760px;
-  border-radius: 14px;
-  background: rgba(16,22,44,.48);
-  border: 1px solid rgba(240,214,150,.24);
-}
-.lineup-member {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  min-width: 72px;
-  color: rgba(253,246,230,.7);
-  transition: transform .18s, color .18s;
-}
-.lineup-portrait {
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: rgba(255,255,255,.08);
-  border: 2px solid rgba(253,246,230,.32);
-  box-shadow: inset 0 0 12px rgba(0,0,0,.2);
-  overflow: hidden;
-  transition: border-color .18s, box-shadow .18s, background .18s, transform .18s;
-}
-.lineup-portrait::before {
-  content: '';
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(253,246,230,.18);
-}
-.lineup-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 12%;
-  display: block;
-}
-.lineup-portrait img.crop-chest {
-  object-position: 50% 8%;
-  scale: 1.25;
-  transform-origin: 50% 8%;
-}
-.lineup-portrait.filled::before {
-  content: none;
-}
-.lineup-member span {
-  font-size: .62rem;
-  font-weight: 800;
-  text-shadow: 0 1px 3px rgba(0,0,0,.6);
-  text-transform: capitalize;
-}
-.lineup-member.done {
-  color: rgba(253,246,230,.9);
-  animation: lineup-pop .4s cubic-bezier(.34,1.56,.64,1) both;
-}
-.lineup-member.done .lineup-portrait {
-  background: #fff;
-  border-color: var(--teal);
-  box-shadow: 0 2px 10px rgba(0,0,0,.2);
-}
-.lineup-member.active {
-  color: #FDF6E6;
-  transform: translateY(-2px);
-}
-.lineup-member.active .lineup-portrait {
-  border-color: var(--yellow);
-  background: rgba(251,191,36,.16);
-  box-shadow:
-    0 0 0 4px rgba(251,191,36,.18),
-    0 0 22px rgba(251,191,36,.35),
-    inset 0 0 12px rgba(251,191,36,.12);
-}
 @keyframes lineup-pop {
   from { opacity: 0; transform: scale(.4) translateY(-8px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
@@ -777,20 +699,42 @@ html, body {
 /* ── ═══════════════════════════════════════════════════════════════
    PHASE 3 — SELFIE
    ══════════════════════════════════════════════════════════════════ */
+#phase-selfie.active {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+#phase-selfie.active .rpg-header-panel {
+  flex: 0 0 auto;
+  margin: 10px auto 0;
+  padding: 10px 26px 11px;
+}
+
+#phase-selfie.active .rpg-header-panel h1 {
+  font-size: clamp(1.05rem, 3vh, 1.45rem);
+}
+
+#phase-selfie.active .rpg-subtitle {
+  font-size: clamp(.78rem, 2vh, .95rem);
+  margin-top: 3px;
+}
+
 #selfie-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px 18px;
-  min-height: 100dvh;
+  padding: 8px 16px 12px;
   justify-content: center;
 }
 
 #selfie-video {
   width: 100%;
-  max-width: min(520px, calc((100dvh - 180px) * .75));
-  max-height: calc(100dvh - 180px);
+  max-width: min(520px, 82vw, calc((100dvh - 210px) * .75));
+  max-height: calc(100dvh - 210px);
   border-radius: var(--radius);
   border: 3px solid rgba(240,214,150,.6);
   box-shadow: 0 10px 30px rgba(0,0,0,.5);
@@ -802,8 +746,8 @@ html, body {
 
 #selfie-preview {
   width: 100%;
-  max-width: min(520px, calc((100dvh - 180px) * .75));
-  max-height: calc(100dvh - 180px);
+  max-width: min(520px, 82vw, calc((100dvh - 210px) * .75));
+  max-height: calc(100dvh - 210px);
   object-fit: contain;
   border-radius: var(--radius);
   border: 3px solid rgba(240,214,150,.6);
@@ -817,7 +761,7 @@ html, body {
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: min(520px, calc((100dvh - 180px) * .75));
+  max-width: min(520px, 82vw, calc((100dvh - 210px) * .75));
 }
 #selfie-actions #retake-btn      { justify-self: start; }
 #selfie-actions #selfie-next-btn { justify-self: end; }
@@ -832,11 +776,11 @@ html, body {
 }
 
 @media (max-height: 720px) {
-  #selfie-wrap { gap: 10px; padding-top: 8px; }
+  #selfie-wrap { gap: 8px; padding-top: 6px; }
   #selfie-video,
   #selfie-preview {
-    max-width: min(440px, calc((100dvh - 160px) * .75));
-    max-height: calc(100dvh - 160px);
+    max-width: min(440px, 82vw, calc((100dvh - 185px) * .75));
+    max-height: calc(100dvh - 185px);
   }
   #snap-btn {
     width: 72px;
@@ -1304,6 +1248,8 @@ html, body {
 }
 #convo-portrait-frame.is-cutout #convo-portrait {
   object-fit: contain;
+  scale: 1;
+  transform-origin: center;
   filter: drop-shadow(0 18px 28px rgba(0,0,0,.5));
 }
 #convo-portrait-frame.is-full-body #convo-portrait {

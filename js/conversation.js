@@ -107,9 +107,10 @@ const Conversation = (() => {
 
   function setSpeaker(name, imgSrc, who) {
     els.speaker.textContent = name;
+    const isTransparentCharacter = who === 'character' && !!_charMeta.transparent;
     els.portraitFrame.classList.toggle('is-player', who === 'player');
-    els.portraitFrame.classList.toggle('is-cutout', who === 'character' && !!_charMeta.transparent);
-    els.portraitFrame.classList.toggle('is-full-body', who === 'character' && !!_charMeta.fullBody);
+    els.portraitFrame.classList.toggle('is-cutout', isTransparentCharacter);
+    els.portraitFrame.classList.toggle('is-full-body', who === 'character' && !!_charMeta.fullBody && !isTransparentCharacter);
     if (imgSrc) {
       els.portrait.src = imgSrc;
       els.portraitFrame.style.visibility = 'visible';

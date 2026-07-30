@@ -76,7 +76,6 @@
 
   // Choose phase
   const charGrid       = $('char-grid');
-  const familyLineup   = $('family-lineup');
 
   // Character profile card
   const profileOverlay = $('profile-overlay');
@@ -228,8 +227,6 @@
 
     chooseHeader.textContent = `This is my ${role}.`;
     chooseSubtitle.textContent = `新しい${ROLE_JP[role]}に会いましょう。`;
-    renderFamilyLineup();
-
     renderPool();
     updateChooseUI();
   }
@@ -286,7 +283,6 @@
     cardEl.classList.add('selected');
     cardEl.appendChild(makeCheckmark());
 
-    renderFamilyLineup();
     Profile.say(`This is my ${role}.`);
 
     // Let the checkmark and grammar line land, then move on.
@@ -308,35 +304,6 @@
       'stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">' +
       '<polyline points="20 6 9 17 4 12"/></svg>';
     return badge;
-  }
-
-  function renderFamilyLineup() {
-    familyLineup.innerHTML = '';
-    SELECT_ORDER.forEach((role, i) => {
-      const item = document.createElement('div');
-      item.className = 'lineup-member';
-      item.classList.toggle('done', i < state.selected.length);
-      item.classList.toggle('active', i === state.roleIndex);
-
-      const char = state.selected[i];
-      if (char) {
-        const portrait = document.createElement('div');
-        portrait.className = 'lineup-portrait';
-        portrait.classList.add('filled');
-        const img = new Image();
-        img.src = Characters.imgUrl(char);
-        img.alt = role;
-        img.classList.toggle('crop-chest', !!char.fullBody);
-        portrait.appendChild(img);
-        item.appendChild(portrait);
-      }
-
-      const label = document.createElement('span');
-      label.textContent = role;
-
-      item.appendChild(label);
-      familyLineup.appendChild(item);
-    });
   }
 
   function updateChooseUI() {
@@ -778,7 +745,6 @@
 
     state.selected = state.selected.slice(0, SELECT_ORDER.length);
     state.roleIndex = Math.min(state.selected.length, SELECT_ORDER.length);
-    renderFamilyLineup();
     enterAssignPhase({ skipMic: true });
   }
 
