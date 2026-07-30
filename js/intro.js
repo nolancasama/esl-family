@@ -13,6 +13,8 @@ const Intro = (() => {
   //   input: true      → shows the name field; submit advances
   //   (none)            → waits for a tap anywhere to advance
   const STEPS = [
+    { text: '「ここはどこ？」' },
+    { text: '「さっきまで、松原市のベッドで寝ていたのに……」' },
     { text: 'どこからか、不思議な声が聞こえる……' },
     { text: '「こんにちは。」' },
     { text: '「わかりますか？」', button: 'はい' },

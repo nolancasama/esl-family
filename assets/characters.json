@@ -411,7 +411,8 @@
     "category": "fantasy",
     "gender": "male",
     "img": "assets/characters/f51.png",
-    "transparent": true
+    "transparent": true,
+    "fullBody": true
   },
   {
     "id": "f52",
@@ -419,7 +420,8 @@
     "category": "fantasy",
     "gender": "male",
     "img": "assets/characters/f52.png",
-    "transparent": true
+    "transparent": true,
+    "fullBody": true
   },
   {
     "id": "f53",
@@ -427,7 +429,8 @@
     "category": "fantasy",
     "gender": "male",
     "img": "assets/characters/f53.png",
-    "transparent": true
+    "transparent": true,
+    "fullBody": true
   },
   {
     "id": "gf51",
@@ -435,7 +438,8 @@
     "category": "fantasy",
     "gender": "male",
     "img": "assets/characters/gf51.png",
-    "transparent": true
+    "transparent": true,
+    "fullBody": true
   },
   {
     "id": "m51",

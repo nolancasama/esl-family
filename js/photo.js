@@ -23,7 +23,8 @@ const Photo = (() => {
   const NAMEPLATE_H  = 34;
   const ROW_GAP       = 34;
   const COL_GAP       = 22;
-  const TOP_MARGIN    = 30;
+  const TOP_MARGIN    = 48;
+  const HIT_PAD       = 18;
   const PORTRAIT_INSET = 0.08; // padding between portrait and frame's inner edge, as a fraction of the hole size
 
   // Each relation gets its own rectangular frame size — a gallery wall
@@ -254,13 +255,31 @@ const Photo = (() => {
     const x = (px / renderW) * CW;
     const y = (py / renderH) * CH;
 
+    let hit = null;
+    let bestDistance = Infinity;
     for (const card of _scene.cards) {
-      const blockH = card.h + GAP + NAMEPLATE_H;
-      if (x >= card.x && x <= card.x + card.w && y >= card.y && y <= card.y + blockH) {
-        return card.key;
+      const bounds = getCardHitBounds(card);
+      if (x < bounds.x || x > bounds.x + bounds.w || y < bounds.y || y > bounds.y + bounds.h) continue;
+
+      const cx = card.x + card.w / 2;
+      const cy = card.y + (card.h + GAP + NAMEPLATE_H) / 2;
+      const distance = Math.hypot(x - cx, y - cy);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        hit = card.key;
       }
     }
-    return null;
+    return hit;
+  }
+
+  function getCardHitBounds(card) {
+    const blockH = card.h + GAP + NAMEPLATE_H;
+    return {
+      x: Math.max(0, card.x - HIT_PAD),
+      y: Math.max(0, card.y - HIT_PAD),
+      w: Math.min(CW, card.x + card.w + HIT_PAD) - Math.max(0, card.x - HIT_PAD),
+      h: Math.min(CH, card.y + blockH + HIT_PAD) - Math.max(0, card.y - HIT_PAD),
+    };
   }
 
   // Viewport-space rect (like getBoundingClientRect) for a given card's

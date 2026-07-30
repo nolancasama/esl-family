@@ -246,6 +246,7 @@
       const imgEl = new Image();
       imgEl.src = Characters.imgUrl(char);
       imgEl.alt = char.name;
+      imgEl.classList.toggle('crop-chest', !!char.fullBody);
       card.appendChild(imgEl);
 
       card.addEventListener('click', () => pickCharacter(char, card));
@@ -324,6 +325,7 @@
         const img = new Image();
         img.src = Characters.imgUrl(char);
         img.alt = role;
+        img.classList.toggle('crop-chest', !!char.fullBody);
         portrait.appendChild(img);
       }
 
