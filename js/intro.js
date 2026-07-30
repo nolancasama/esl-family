@@ -13,18 +13,18 @@ const Intro = (() => {
   //   input: true      → shows the name field; submit advances
   //   (none)            → waits for a tap anywhere to advance
   const STEPS = [
-    { text: '「ここはどこ？」' },
-    { text: '「さっきまで、松原市のベッドで寝ていたのに……」' },
-    { text: 'どこからか、不思議な声が聞こえる……' },
-    { text: '「こんにちは。」' },
-    { text: '「わかりますか？」', button: 'はい' },
-    { text: '「よかった。」' },
-    { text: '「あなたの名前を教えてください。」', input: true },
-    { name: true }, // 「ようこそ、○○。」— built from the entered name
-    { text: '「あなたは異世界へやって来ました。」' },
-    { text: '「もう元の世界へ戻ることはできません。」' },
-    { text: '「新しい人生を始めるために……」' },
-    { text: '「新しい家族を選んでください。」' },
+    { speaker: 'あなた', text: '「ここはどこ？」' },
+    { speaker: 'あなた', text: '「さっきまで、松原市のベッドで寝ていたのに……」' },
+    { speaker: 'ナレーション', text: 'どこからか、不思議な声が聞こえる……' },
+    { speaker: '不思議な声', text: '「こんにちは。」' },
+    { speaker: '不思議な声', text: '「わかりますか？」', button: 'はい' },
+    { speaker: '不思議な声', text: '「よかった。」' },
+    { speaker: '不思議な声', text: '「あなたの名前を教えてください。」', input: true },
+    { speaker: '不思議な声', name: true }, // 「ようこそ、○○。」— built from the entered name
+    { speaker: '不思議な声', text: '「あなたは異世界へやって来ました。」' },
+    { speaker: '不思議な声', text: '「もう元の世界へ戻ることはできません。」' },
+    { speaker: '不思議な声', text: '「新しい人生を始めるために……」' },
+    { speaker: '不思議な声', text: '「新しい家族を選んでください。」' },
   ];
 
   let els        = {};
@@ -61,6 +61,7 @@ const Intro = (() => {
     els.inputWrap.style.display = 'none';
     // The tap-to-advance hint only applies to plain lines, not button/input steps.
     els.hint.style.display = (step.button || step.input) ? 'none' : '';
+    els.speaker.textContent = step.speaker || '';
 
     const text = step.name ? `「ようこそ、${playerName}。」` : step.text;
 

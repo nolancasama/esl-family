@@ -66,6 +66,7 @@
   // Intro phase
   const introSkipBtn   = $('intro-skip-btn');
   const introTapZone   = $('intro-tap-zone');
+  const introSpeaker   = $('intro-speaker');
   const introLine      = $('intro-line');
   const introHint      = $('intro-hint');
   const introYesBtn    = $('intro-yes-btn');
@@ -173,6 +174,7 @@
 
   Intro.init({
     tapZone:   introTapZone,
+    speaker:   introSpeaker,
     lineEl:    introLine,
     hint:      introHint,
     yesBtn:    introYesBtn,
@@ -316,23 +318,22 @@
       item.classList.toggle('done', i < state.selected.length);
       item.classList.toggle('active', i === state.roleIndex);
 
-      const portrait = document.createElement('div');
-      portrait.className = 'lineup-portrait';
-
       const char = state.selected[i];
       if (char) {
+        const portrait = document.createElement('div');
+        portrait.className = 'lineup-portrait';
         portrait.classList.add('filled');
         const img = new Image();
         img.src = Characters.imgUrl(char);
         img.alt = role;
         img.classList.toggle('crop-chest', !!char.fullBody);
         portrait.appendChild(img);
+        item.appendChild(portrait);
       }
 
       const label = document.createElement('span');
       label.textContent = role;
 
-      item.appendChild(portrait);
       item.appendChild(label);
       familyLineup.appendChild(item);
     });
@@ -384,6 +385,7 @@
     // Large character image
     assignCharImg.src = Characters.imgUrl(char);
     assignCharImg.alt = char.name;
+    assignCharImg.classList.toggle('crop-chest', !!char.fullBody);
 
     assignSentence.textContent = `This is my ${role}.`;
     clearFeedback();

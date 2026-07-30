@@ -141,6 +141,20 @@ html, body {
   cursor: pointer;
 }
 
+#intro-speaker {
+  min-height: 1.6em;
+  padding: 5px 14px 6px;
+  border: 1px solid rgba(240,214,150,.38);
+  border-radius: 999px;
+  background: rgba(16,22,44,.42);
+  color: rgba(253,246,230,.84);
+  font-size: .86rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,.55);
+}
+
 #intro-line {
   color: #F4F1E8;
   font-size: 1.6rem;
@@ -290,6 +304,7 @@ html, body {
   text-align: center;
   cursor: pointer;
   border: 3px solid transparent;
+  overflow: hidden;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   animation: card-enter .55s cubic-bezier(.22,1,.36,1) both;
@@ -335,7 +350,9 @@ html, body {
 }
 .char-card img.crop-chest {
   object-fit: cover;
-  object-position: 50% 12%;
+  object-position: 50% 8%;
+  scale: 1.32;
+  transform-origin: 50% 8%;
 }
 @keyframes portrait-idle {
   0%, 100% { transform: translateY(0)     scale(1);     }
@@ -400,6 +417,8 @@ html, body {
 }
 .lineup-portrait img.crop-chest {
   object-position: 50% 8%;
+  scale: 1.25;
+  transform-origin: 50% 8%;
 }
 .lineup-portrait.filled::before {
   content: none;
@@ -493,7 +512,12 @@ html, body {
 }
 #profile-overlay.active #profile-card { transform: translateX(0); opacity: 1; }
 
-#profile-left { flex-shrink: 0; }
+#profile-left {
+  flex-shrink: 0;
+  width: 240px;
+  height: 336px;
+  overflow: hidden;
+}
 
 #profile-portrait {
   width: 240px;
@@ -504,7 +528,9 @@ html, body {
 }
 #profile-portrait.crop-chest {
   object-fit: cover;
-  object-position: 50% 12%;
+  object-position: 50% 8%;
+  scale: 1.32;
+  transform-origin: 50% 8%;
 }
 @keyframes portrait-zoom {
   from { transform: scale(.8); opacity: 0; }
@@ -547,6 +573,7 @@ html, body {
     max-height: 92vh;
     overflow-y: auto;
   }
+  #profile-left { width: 200px; height: 280px; }
   #profile-portrait { width: 200px; height: 280px; }
   #profile-right { width: 100%; }
 }
@@ -597,6 +624,11 @@ html, body {
   display: block;
   pointer-events: none;
   user-select: none;
+}
+#assign-char-img.crop-chest {
+  object-position: 50% 8%;
+  scale: 1.32;
+  transform-origin: 50% 8%;
 }
 
 /* Top overlay: instruction + target sentence */
@@ -751,12 +783,14 @@ html, body {
   align-items: center;
   gap: 12px;
   padding: 12px 16px 18px;
+  min-height: 100dvh;
+  justify-content: center;
 }
 
 #selfie-video {
   width: 100%;
-  max-width: 400px;
-  max-height: min(52vh, 520px);
+  max-width: min(520px, calc((100dvh - 180px) * .75));
+  max-height: calc(100dvh - 180px);
   border-radius: var(--radius);
   border: 3px solid rgba(240,214,150,.6);
   box-shadow: 0 10px 30px rgba(0,0,0,.5);
@@ -768,8 +802,8 @@ html, body {
 
 #selfie-preview {
   width: 100%;
-  max-width: 400px;
-  max-height: min(52vh, 520px);
+  max-width: min(520px, calc((100dvh - 180px) * .75));
+  max-height: calc(100dvh - 180px);
   object-fit: contain;
   border-radius: var(--radius);
   border: 3px solid rgba(240,214,150,.6);
@@ -783,7 +817,7 @@ html, body {
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 400px;
+  max-width: min(520px, calc((100dvh - 180px) * .75));
 }
 #selfie-actions #retake-btn      { justify-self: start; }
 #selfie-actions #selfie-next-btn { justify-self: end; }
@@ -801,8 +835,8 @@ html, body {
   #selfie-wrap { gap: 10px; padding-top: 8px; }
   #selfie-video,
   #selfie-preview {
-    max-width: 340px;
-    max-height: 46vh;
+    max-width: min(440px, calc((100dvh - 160px) * .75));
+    max-height: calc(100dvh - 160px);
   }
   #snap-btn {
     width: 72px;
@@ -830,6 +864,7 @@ html, body {
   text-align: center;
   width: 100%;
   max-width: 360px;
+  overflow: hidden;
 }
 
 #pres-char-img {
@@ -841,7 +876,9 @@ html, body {
 }
 #pres-char-img.crop-chest {
   object-fit: cover;
-  object-position: 50% 12%;
+  object-position: 50% 8%;
+  scale: 1.32;
+  transform-origin: 50% 8%;
 }
 
 @keyframes pop-in {
@@ -1271,7 +1308,9 @@ html, body {
 }
 #convo-portrait-frame.is-full-body #convo-portrait {
   object-fit: cover;
-  object-position: 50% 12%;
+  object-position: 50% 8%;
+  scale: 1.32;
+  transform-origin: 50% 8%;
 }
 /* The player's selfie is a real photo, not illustrated art — fill the
    frame edge-to-edge (cover, no mat) instead of sitting on a card. */

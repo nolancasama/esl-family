@@ -7,12 +7,15 @@
  *
  * Flow per question:
  *   family member asks → player picks an answer → player's selfie and
- *   chosen sentence appear briefly → family member reacts → next question.
+ *   chosen sentence waits for a tap → family member reacts → next question.
  */
 
 const Conversation = (() => {
 
-  const PLAYER_LINE_MS = 1900;  // how long the player's own line stays up
+  const INDICATOR_DELAY_MS = 500;
+  const AUTO_REACTION_MIN_MS = 2500;
+  const AUTO_REACTION_MAX_MS = 6000;
+  const AUTO_REACTION_WORD_MS = 650;
 
   let _data   = {};
   let els     = {};
@@ -43,9 +46,9 @@ const Conversation = (() => {
 
   function init(elements) {
     els = elements;
-    els.box.addEventListener('click', (e) => {
-      if (e.target.closest('.convo-answer')) return;  // answer buttons handle themselves
-      if (_advance) { const go = _advance; _advance = null; clearTimeout(_timer); go(); }
+    els.overlay.addEventListener('click', (e) => {
+      if (e.target.closest('.convo-answer, #convo-close-btn')) return;  // buttons handle themselves
+      advanceDialogueNow();
     });
     els.closeBtn.addEventListener('click', () => finish());
   }
@@ -91,7 +94,7 @@ const Conversation = (() => {
     els.text.textContent = text;
     clearAnswers();
     say(text);
-    waitThenAdvance(text, next);
+    waitThenAdvance(text, next, { autoClose: isAutoCloseLine(text) });
   }
 
   function showPlayerLine(text, next) {
@@ -99,11 +102,7 @@ const Conversation = (() => {
     els.text.textContent = text;
     clearAnswers();
     say(text);
-    // The player's own line is a brief beat, not something to tap through.
-    els.hint.style.display = 'none';
-    _advance = null;
-    clearTimeout(_timer);
-    _timer = setTimeout(next, PLAYER_LINE_MS);
+    waitThenAdvance(text, next, { autoClose: false });
   }
 
   function setSpeaker(name, imgSrc, who) {
@@ -143,6 +142,7 @@ const Conversation = (() => {
     renderAnswers(q.answers);
     els.hint.style.display = 'none';
     _advance = null;
+    clearTimeout(_timer);
   }
 
   function renderAnswers(answers) {
@@ -179,16 +179,42 @@ const Conversation = (() => {
 
   /* ── Pacing ─────────────────────────────────────────────────────── */
 
-  // Character lines auto-advance after a beat sized to the sentence, but a
-  // tap anywhere in the box skips ahead immediately.
-  function waitThenAdvance(text, next) {
-    els.hint.style.display = '';
-    _advance = next;
+  function waitThenAdvance(text, next, { autoClose = false } = {}) {
     clearTimeout(_timer);
-    const ms = Math.min(6000, Math.max(2200, text.length * 95));
+    els.hint.style.display = 'none';
+    _advance = next;
+
+    if (autoClose) {
+      _timer = setTimeout(advanceDialogueNow, autoCloseMs(text));
+      return;
+    }
+
     _timer = setTimeout(() => {
-      if (_advance) { _advance = null; next(); }
-    }, ms);
+      if (_advance) els.hint.style.display = '';
+    }, INDICATOR_DELAY_MS);
+  }
+
+  function advanceDialogueNow() {
+    if (!_advance) return;
+    const go = _advance;
+    _advance = null;
+    clearTimeout(_timer);
+    els.hint.style.display = 'none';
+    go();
+  }
+
+  function isAutoCloseLine(text) {
+    const words = countWords(text);
+    return words > 0 && words <= 3 && text.trim().length <= 28;
+  }
+
+  function autoCloseMs(text) {
+    const ms = Math.max(AUTO_REACTION_MIN_MS, countWords(text) * AUTO_REACTION_WORD_MS);
+    return Math.min(AUTO_REACTION_MAX_MS, ms);
+  }
+
+  function countWords(text) {
+    return (String(text).match(/[A-Za-z0-9']+/g) || []).length;
   }
 
   function say(text) {
@@ -198,6 +224,7 @@ const Conversation = (() => {
   function finish() {
     if (!_open) return;   // no-op when nothing is open (e.g. on restart)
     clearTimeout(_timer);
+    els.hint.style.display = 'none';
     _advance = null;
     _open    = false;
     try { window.speechSynthesis.cancel(); } catch (_) {}

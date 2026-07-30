@@ -114,13 +114,13 @@ const Photo = (() => {
   }
 
   /* ── Cover-fit image draw (matches CSS object-fit:cover) ──────────── */
-  function drawCover(ctx, img, x, y, w, h, biasY) {
+  function drawCover(ctx, img, x, y, w, h, biasY, zoom = 1) {
     if (!img) {
       ctx.fillStyle = '#fff';
       ctx.fillRect(x, y, w, h);
       return;
     }
-    const scale = Math.max(w / img.width, h / img.height);
+    const scale = Math.max(w / img.width, h / img.height) * zoom;
     const sw = img.width * scale, sh = img.height * scale;
     const dx = x - (sw - w) * 0.5;
     const dy = y - (sh - h) * (biasY ?? 0.5);
@@ -128,7 +128,7 @@ const Photo = (() => {
   }
 
   /* ── One framed portrait, with nameplate below ────────────────────── */
-  function drawFrame(ctx, x, y, w, h, portraitImg, frameInfo, frameImg, label, biasY) {
+  function drawFrame(ctx, x, y, w, h, portraitImg, frameInfo, frameImg, label, biasY, zoom = 1) {
     const hole = frameInfo.hole;
     const holeX = x + hole.x0 * w;
     const holeY = y + hole.y0 * h;
@@ -145,7 +145,7 @@ const Photo = (() => {
     // Inset the portrait within the hole so a bit of matting shows
     // between the picture and the frame's inner edge.
     const padX = holeW * PORTRAIT_INSET, padY = holeH * PORTRAIT_INSET;
-    drawCover(ctx, portraitImg, holeX + padX, holeY + padY, holeW - padX * 2, holeH - padY * 2, biasY);
+    drawCover(ctx, portraitImg, holeX + padX, holeY + padY, holeW - padX * 2, holeH - padY * 2, biasY, zoom);
     ctx.restore();
 
     // Frame art on top (transparent hole reveals the portrait), stretched
@@ -192,7 +192,7 @@ const Photo = (() => {
     ctx.scale(Math.max(0.001, scale), Math.max(0.001, scale));
     ctx.translate(-cx, -cy);
     ctx.globalAlpha = Math.min(1, scale * 1.3);
-    drawFrame(ctx, card.x, card.y, card.w, card.h, card.img, card.frameInfo, card.frameImg, card.label, card.biasY);
+    drawFrame(ctx, card.x, card.y, card.w, card.h, card.img, card.frameInfo, card.frameImg, card.label, card.biasY, card.zoom);
     ctx.restore();
   }
 
@@ -360,7 +360,7 @@ const Photo = (() => {
       cards.push({
         key: r, x: pos.x, y, w: pos.w, h: pos.h,
         img: backImgs[i], frameInfo: FRAME_INFO[r], frameImg: frameImgs[r],
-        label: capitalize(r), biasY: char.fullBody ? 0.05 : 0.15,
+        label: capitalize(r), biasY: char.fullBody ? 0.08 : 0.15, zoom: char.fullBody ? 1.4 : 1,
       });
     });
     const row1Bottom = TOP_MARGIN + back.maxH + GAP + NAMEPLATE_H;
@@ -375,7 +375,8 @@ const Photo = (() => {
         key: k, x: pos.x, y, w: pos.w, h: pos.h,
         img: frontImgs[i], frameInfo: FRAME_INFO[k], frameImg: frameImgs[k],
         label: k === 'me' ? (playerName || 'Me') : capitalize(k),
-        biasY: k === 'me' ? 0.3 : char.fullBody ? 0.05 : 0.15,
+        biasY: k === 'me' ? 0.3 : char.fullBody ? 0.08 : 0.15,
+        zoom: k === 'me' ? 1 : char.fullBody ? 1.4 : 1,
       });
     });
 

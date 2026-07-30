@@ -10,6 +10,8 @@
 
 const Reflection = (() => {
 
+  const INDICATOR_DELAY_MS = 500;
+
   const MONOLOGUE = [
     { text: 'I had a wonderful day.', ja: 'すてきな一日だった。' },
     { text: 'I met my new family.', ja: '新しい家族に会った。' },
@@ -34,9 +36,9 @@ const Reflection = (() => {
   function init(elements, onReplay) {
     els = elements;
     _onReplay = onReplay;
-    els.box.addEventListener('click', (e) => {
-      if (e.target.closest('.reflect-choice')) return;
-      if (_advance) { const go = _advance; _advance = null; clearTimeout(_timer); go(); }
+    els.overlay.addEventListener('click', (e) => {
+      if (e.target.closest('.reflect-choice, #reflect-replay-btn')) return;
+      advanceDialogueNow();
     });
     els.replayBtn.addEventListener('click', () => {
       Ambient.stop();
@@ -78,12 +80,7 @@ const Reflection = (() => {
     const line = MONOLOGUE[i];
     const text = renderReflectionText(line);
     say(text);
-    els.hint.style.display = '';
-    _advance = () => step(i + 1);
-    clearTimeout(_timer);
-    _timer = setTimeout(() => {
-      if (_advance) { _advance = null; step(i + 1); }
-    }, Math.max(2400, text.length * 95));
+    waitForTap(() => step(i + 1));
   }
 
   function renderReflectionText(line) {
@@ -108,6 +105,7 @@ const Reflection = (() => {
   function showChoices() {
     els.hint.style.display = 'none';
     _advance = null;
+    clearTimeout(_timer);
     els.choices.innerHTML = '';
     CHOICES.forEach(c => {
       const btn = document.createElement('button');
@@ -129,8 +127,26 @@ const Reflection = (() => {
       clearChoices();
       els.text.textContent = c.text;
       say(c.text);
-      _timer = setTimeout(fadeToEnd, 2000);
+      waitForTap(fadeToEnd);
     }, 380);
+  }
+
+  function waitForTap(next) {
+    clearTimeout(_timer);
+    els.hint.style.display = 'none';
+    _advance = next;
+    _timer = setTimeout(() => {
+      if (_advance) els.hint.style.display = '';
+    }, INDICATOR_DELAY_MS);
+  }
+
+  function advanceDialogueNow() {
+    if (!_advance) return;
+    const go = _advance;
+    _advance = null;
+    clearTimeout(_timer);
+    els.hint.style.display = 'none';
+    go();
   }
 
   function fadeToEnd() {
@@ -158,6 +174,7 @@ const Reflection = (() => {
   function close() {
     if (!_open) return;
     clearTimeout(_timer);
+    els.hint.style.display = 'none';
     _advance = null;
     _open = false;
     Ambient.stop();
