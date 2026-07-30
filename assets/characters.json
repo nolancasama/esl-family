@@ -448,5 +448,17 @@
     "gender": "female",
     "img": "assets/characters/m51.png",
     "fullBody": true
+  },
+  {
+    "id": "gf52",
+    "name": "King Edmund",
+    "category": "fantasy",
+    "gender": "male",
+    "img": "assets/characters/gf52-cutout.png",
+    "transparent": true,
+    "fullBody": true,
+    "portraitCrop": "close",
+    "conversationScale": "large",
+    "recordingFullBody": true
   }
 ]

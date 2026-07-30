@@ -23,7 +23,7 @@
   // Real-art characters, scoped to a single role's choose step — never shown for any other role.
   const ROLE_CHAR_IDS = {
     brother:     ['g06', 'g08', 'g14', 'g27', 'i02', 'i14', 'i27', 'i41', 'i49'],
-    grandfather: ['g04', 'g19', 'g34', 'g40', 'g42', 'g47', 'g48', 'i01', 'i03', 'i36', 'gf51'],
+    grandfather: ['g04', 'g19', 'g34', 'g40', 'g42', 'g47', 'g48', 'i01', 'i03', 'i36', 'gf51', 'gf52'],
     sister:      ['g05', 'g07', 'g13', 'g18', 'g31', 'g41', 'i18', 'i22', 'i50'],
     father:      ['g02', 'g15', 'g20', 'g33', 'g39', 'g43', 'i05', 'i21', 'i40', 'i47', 'f51', 'f52', 'f53'],
     mother:      ['g21', 'g24', 'g28', 'g37', 'g38', 'g46', 'i13', 'i23', 'i37', 'i48', 'm51'],
@@ -248,6 +248,7 @@
       imgEl.src = Characters.imgUrl(char);
       imgEl.alt = char.name;
       imgEl.classList.toggle('crop-chest', !!char.fullBody);
+      imgEl.classList.toggle('crop-close', char.portraitCrop === 'close');
       card.appendChild(imgEl);
 
       card.addEventListener('click', () => pickCharacter(char, card));
@@ -354,7 +355,9 @@
     // Large character image
     assignCharImg.src = Characters.imgUrl(char);
     assignCharImg.alt = char.name;
-    assignCharImg.classList.toggle('crop-chest', !!char.fullBody);
+    const useChestCrop = !!char.fullBody && !char.recordingFullBody;
+    assignCharImg.classList.toggle('crop-chest', useChestCrop);
+    assignCharImg.classList.toggle('crop-close', useChestCrop && char.portraitCrop === 'close');
 
     assignSentence.textContent = `This is my ${role}.`;
     clearFeedback();

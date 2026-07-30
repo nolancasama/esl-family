@@ -45,6 +45,7 @@ const Profile = (() => {
     els.portrait.src = portraitSrc;
     els.portrait.alt = char.name;
     els.portrait.classList.toggle('crop-chest', !!char.fullBody);
+    els.portrait.classList.toggle('crop-close', char.portraitCrop === 'close');
 
     // プロフィール — compact rows: bold Japanese label + English sentence.
     els.fields.innerHTML = '';

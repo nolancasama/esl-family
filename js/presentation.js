@@ -53,6 +53,7 @@ const Presentation = (() => {
     _charImgEl.src = Characters.imgUrl(char);
     _charImgEl.alt = char.name;
     _charImgEl.classList.toggle('crop-chest', !!char.fullBody);
+    _charImgEl.classList.toggle('crop-close', char.portraitCrop === 'close');
     _progressEl.textContent = `${_index + 1} / ${orderedRoles.length}`;
 
     // Pop-in animation

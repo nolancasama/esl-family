@@ -2728,5 +2728,29 @@
       ["好きな色", "My favorite color is blue."],
       ["行きたい場所", "I want to go to France."]
     ]
+  },
+  "gf52": {
+    "name": "Edmund",
+    "intro": [
+      "Hello!",
+      "My name is Edmund.",
+      "I am 73 years old.",
+      "My birthday is February 14th.",
+      "I like horses.",
+      "My favorite food is bread.",
+      "My favorite color is blue.",
+      "I read old stories on Sundays.",
+      "I want to go to England.",
+      "Nice to meet you!"
+    ],
+    "fields": [
+      ["名前", "My name is Edmund（エドマンド）."],
+      ["年齢", "I am 73 years old."],
+      ["誕生日", "My birthday is February 14th."],
+      ["好きなもの", "I like horses."],
+      ["好きな食べ物", "My favorite food is bread."],
+      ["好きな色", "My favorite color is blue."],
+      ["行きたい場所", "I want to go to England."]
+    ]
   }
 }
