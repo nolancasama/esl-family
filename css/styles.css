@@ -1293,7 +1293,6 @@ html, body {
   font-weight: 800;
   color: #F0D696;
   letter-spacing: .04em;
-  text-transform: capitalize;
   text-shadow: 0 2px 5px rgba(0,0,0,.6);
   margin-bottom: 8px;
 }

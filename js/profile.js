@@ -97,7 +97,23 @@ const Profile = (() => {
     return d ? d.name : '';
   }
 
-  return { load, init, open, close, say, displayName };
+  function displayNameWithReading(charId) {
+    const name = displayName(charId);
+    const reading = nameReading(charId);
+    return reading ? `${name}（${reading}）` : name;
+  }
+
+  function nameReading(charId) {
+    const d = _profiles[charId];
+    if (!d) return '';
+    const fields = d.fields || [];
+    const nameField = fields.find(([label]) => label === '名前');
+    const sentence = nameField && nameField[1];
+    const match = sentence && sentence.match(/（([^）]+)）/);
+    return match ? match[1] : '';
+  }
+
+  return { load, init, open, close, say, displayName, displayNameWithReading };
 })();
 
 

@@ -669,7 +669,9 @@
 
     stopHintRotation();
     hideMeGlow();
-    const speakerName = Profile.displayName(entry.char.id) || capitalize(key);
+    const speakerName = Profile.displayNameWithReading(entry.char.id)
+                     || Profile.displayName(entry.char.id)
+                     || capitalize(key);
     Conversation.start(
       key,
       speakerName,
