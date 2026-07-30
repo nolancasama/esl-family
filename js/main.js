@@ -751,12 +751,16 @@
 
   function debugSkipCurrentPhase() {
     console.info(`Debug skip: ${state.phase}`);
-    if (state.phase === 'choose') {
+    if (Conversation.isOpen()) {
+      Conversation.close();
+    } else if (state.phase === 'choose') {
       debugSkipChoosePhase();
     } else if (state.phase === 'assign') {
       debugSkipAssignPhase();
     } else if (state.phase === 'presentation') {
       Presentation.skip();
+    } else if (state.phase === 'photo') {
+      debugSkipPhotoPhase();
     }
   }
 
@@ -808,6 +812,14 @@
 
     state.assignIndex = state.selected.length;
     enterSelfiePhase();
+  }
+
+  function debugSkipPhotoPhase() {
+    stopHintRotation();
+    Object.keys(state.assignments).forEach(role => state.talkedTo.add(role));
+    refreshMeGlow();
+    hideMeGlow();
+    enterReflection();
   }
 
   // ── ═══════════════════════════════════════════════════════════════
