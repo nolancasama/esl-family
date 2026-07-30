@@ -742,9 +742,9 @@ html, body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
+  column-gap: 8px;
   width: 100%;
-  max-width: min(540px, calc(100vw - 32px));
+  max-width: min(390px, calc(100vw - 32px));
 }
 #selfie-actions #retake-btn      { justify-self: start; }
 #selfie-actions #selfie-next-btn { justify-self: end; }
@@ -773,7 +773,7 @@ html, body {
 
 @media (max-width: 420px) {
   #selfie-actions {
-    gap: 8px;
+    column-gap: 6px;
     max-width: calc(100vw - 24px);
   }
   #selfie-actions .btn {
