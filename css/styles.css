@@ -945,9 +945,13 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(0,0,0,.28);
+  box-shadow: 0 2px 7px rgba(0,0,0,.24);
   transform: translate(-50%, -50%);
   animation: lineup-pop .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+.photo-complete-mark svg {
+  width: 60%;
+  height: 60%;
 }
 
 /* ── Player-portrait glow, once every family member has been talked to ──
@@ -1198,7 +1202,23 @@ html, body {
   visibility: hidden;
   transition: opacity .45s ease, visibility .45s;
 }
+#convo-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(8,10,22,.28), rgba(8,10,22,.45));
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity .45s ease;
+}
 #convo-overlay.active { opacity: 1; visibility: visible; }
+#convo-overlay.intro-linger::before { opacity: 0; }
+#convo-overlay.intro-linger #convo-layout,
+#convo-overlay.intro-linger #convo-close-btn {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 #convo-close-btn {
   position: absolute;
@@ -1229,6 +1249,7 @@ html, body {
   grid-template-columns: minmax(210px, 280px) minmax(0, 1fr);
   align-items: end;
   gap: 22px;
+  z-index: 1;
 }
 
 /* Speaker profile, paired to the left of the dialogue and options. */

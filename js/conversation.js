@@ -16,6 +16,8 @@ const Conversation = (() => {
   const AUTO_REACTION_MIN_MS = 2500;
   const AUTO_REACTION_MAX_MS = 6000;
   const AUTO_REACTION_WORD_MS = 650;
+  const INTRO_LINGER_MS = 2500;
+  const OVERLAY_FADE_IN_MS = 450;
 
   let _data   = {};
   let els     = {};
@@ -50,7 +52,7 @@ const Conversation = (() => {
       if (e.target.closest('.convo-answer, #convo-close-btn')) return;  // buttons handle themselves
       advanceDialogueNow();
     });
-    els.closeBtn.addEventListener('click', () => finish());
+    els.closeBtn.addEventListener('click', () => finish(false));
     document.addEventListener('keydown', handleKeyAdvance);
   }
 
@@ -64,8 +66,9 @@ const Conversation = (() => {
    * @param playerName  the player's entered name
    * @param onDone      called after the scene fades out
    * @param charMeta    optional character display metadata
+   * @param options     optional scene behavior controls
    */
-  function start(role, speakerName, charImgSrc, playerImg, playerName, onDone, charMeta = {}) {
+  function start(role, speakerName, charImgSrc, playerImg, playerName, onDone, charMeta = {}, options = {}) {
     _script = _data[role];
     if (!_script) { if (onDone) onDone(); return; }
 
@@ -79,13 +82,27 @@ const Conversation = (() => {
     _qIndex      = 0;
     _open        = true;
 
-    els.overlay.style.backgroundImage =
-      `linear-gradient(rgba(8,10,22,.28), rgba(8,10,22,.45)), url('${_script.bg}')`;
+    const hasIntroLinger = !!options.hasIntroLinger;
+    els.overlay.classList.toggle('intro-linger', hasIntroLinger);
+    // The backdrop is always the original artwork. CSS supplies the normal
+    // darkening layer, and removes it for a first-visit linger.
+    els.overlay.style.backgroundImage = `url('${_script.bg}')`;
     els.overlay.classList.add('active');
     Sfx.whoosh();
 
-    // Greeting, then the first question.
-    showCharacterLine(_script.greeting, () => askQuestion(0));
+    clearTimeout(_timer);
+    if (hasIntroLinger) {
+      // Count only after the overlay fade has completed, so the scene stays
+      // bright and free of dialogue for the full requested 2.5 seconds.
+      _timer = setTimeout(() => {
+        if (!_open) return;
+        els.overlay.classList.remove('intro-linger');
+        showCharacterLine(_script.greeting, () => askQuestion(0));
+      }, OVERLAY_FADE_IN_MS + INTRO_LINGER_MS);
+    } else {
+      // Greeting, then the first question.
+      showCharacterLine(_script.greeting, () => askQuestion(0));
+    }
   }
 
   /* ── Speakers ───────────────────────────────────────────────────── */
@@ -130,7 +147,7 @@ const Conversation = (() => {
 
   function askQuestion(i) {
     if (i >= _script.questions.length) {
-      showCharacterLine(_script.farewell, () => finish());
+      showCharacterLine(_script.farewell, () => finish(true));
       return;
     }
     _qIndex = i;
@@ -230,7 +247,7 @@ const Conversation = (() => {
     if (window.Profile && Profile.say) Profile.say(text);
   }
 
-  function finish() {
+  function finish(completed = false) {
     if (!_open) return;   // no-op when nothing is open (e.g. on restart)
     clearTimeout(_timer);
     els.hint.style.display = 'none';
@@ -238,11 +255,11 @@ const Conversation = (() => {
     _open    = false;
     try { window.speechSynthesis.cancel(); } catch (_) {}
     Sfx.whoosh(true);
-    els.overlay.classList.remove('active');
+    els.overlay.classList.remove('active', 'intro-linger');
     clearAnswers();
     const done = _onDone;
     _onDone = null;
-    if (done) done();
+    if (done) done(completed);
   }
 
   return { load, init, start, isOpen, close: finish };

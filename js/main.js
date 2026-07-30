@@ -47,6 +47,7 @@
     micOpen:        false,
     playerName:     '',
     talkedTo:       new Set(), // roles the player has finished a conversation with
+    conversationIntroduced: new Set(), // roles that have shown the first-time background linger
     phase:          '',
   };
 
@@ -203,6 +204,7 @@
     state.selfieDataURL   = null;
     state.assignIndex     = 0;
     state.talkedTo        = new Set();
+    state.conversationIntroduced = new Set();
 
     Profile.close();
     Conversation.close();
@@ -646,8 +648,13 @@
       .forEach(role => {
         const rect = Photo.getCardScreenRect(photoCanvas, role);
         if (!rect) return;
-        const markSize = 40;
-        const markPadding = 10;
+        // Scale the badge to the frame so it remains fully inside the
+        // upper-right corner on both large and small portraits.  The inset
+        // is deliberately a little larger than the old fixed value so the
+        // circle has visible breathing room from both frame edges.
+        const shortSide = Math.min(rect.width, rect.height);
+        const markSize = Math.max(22, Math.min(36, Math.round(shortSide * 0.3)));
+        const markPadding = Math.max(8, Math.round(markSize * 0.4));
         const markCenterInset = markSize / 2 + markPadding;
         const mark = document.createElement('div');
         mark.className = 'photo-complete-mark';
@@ -655,6 +662,8 @@
           '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
           'stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">' +
           '<polyline points="20 6 9 17 4 12"/></svg>';
+        mark.style.width = `${markSize}px`;
+        mark.style.height = `${markSize}px`;
         mark.style.left = `${rect.left + rect.width - markCenterInset}px`;
         mark.style.top  = `${rect.top + markCenterInset}px`;
         completionMarks.appendChild(mark);
@@ -710,19 +719,24 @@
     const speakerName = Profile.displayNameWithReading(entry.char.id)
                      || Profile.displayName(entry.char.id)
                      || capitalize(key);
+    const hasIntroLinger = !state.conversationIntroduced.has(key);
+    state.conversationIntroduced.add(key);
     Conversation.start(
       key,
       speakerName,
       Characters.imgUrl(entry.char),
       state.selfieDataURL,
       state.playerName,
-      () => {
-        state.talkedTo.add(key);
-        refreshCompletionMarks();
+      (completed) => {
+        if (completed) {
+          state.talkedTo.add(key);
+          refreshCompletionMarks();
+        }
         startHintRotation();
         refreshMeGlow();
       },
-      entry.char
+      entry.char,
+      { hasIntroLinger }
     );
   });
 
