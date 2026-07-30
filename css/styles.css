@@ -245,11 +245,18 @@ html, body {
   background-size: cover;
   background-position: center;
 }
+#phase-choose > .rpg-header-panel,
+#phase-choose > .page-body {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .45s ease, visibility 0s linear;
+}
 #phase-choose.intro-linger > .rpg-header-panel,
 #phase-choose.intro-linger > .page-body {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  transition: opacity .2s ease, visibility 0s linear .2s;
 }
 
 /* ── JRPG-style title panel ───────────────────────────────────────── */
