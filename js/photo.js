@@ -336,11 +336,12 @@ const Photo = (() => {
     const back = layoutRow(backRoles);
     back.positions.forEach((pos, i) => {
       const r = backRoles[i];
+      const char = assignments[r].char;
       const y = TOP_MARGIN + (back.maxH - pos.h);
       cards.push({
         key: r, x: pos.x, y, w: pos.w, h: pos.h,
         img: backImgs[i], frameInfo: FRAME_INFO[r], frameImg: frameImgs[r],
-        label: capitalize(r), biasY: 0.15,
+        label: capitalize(r), biasY: char.fullBody ? 0.05 : 0.15,
       });
     });
     const row1Bottom = TOP_MARGIN + back.maxH + GAP + NAMEPLATE_H;
@@ -350,10 +351,12 @@ const Photo = (() => {
     front.positions.forEach((pos, i) => {
       const k = frontKeys[i];
       const y = row2Top + (front.maxH - pos.h);
+      const char = k === 'me' ? null : assignments[k].char;
       cards.push({
         key: k, x: pos.x, y, w: pos.w, h: pos.h,
         img: frontImgs[i], frameInfo: FRAME_INFO[k], frameImg: frameImgs[k],
-        label: k === 'me' ? (playerName || 'Me') : capitalize(k), biasY: k === 'me' ? 0.3 : 0.15,
+        label: k === 'me' ? (playerName || 'Me') : capitalize(k),
+        biasY: k === 'me' ? 0.3 : char.fullBody ? 0.05 : 0.15,
       });
     });
 

@@ -22,6 +22,7 @@ const Conversation = (() => {
   let _role       = '';
   let _script     = null;
   let _charImg    = '';
+  let _charMeta   = {};
   let _speakerName = '';
   let _playerImg  = '';
   let _playerName = 'Me';
@@ -58,14 +59,16 @@ const Conversation = (() => {
    * @param playerImg   the player's selfie (may be null)
    * @param playerName  the player's entered name
    * @param onDone      called after the scene fades out
+   * @param charMeta    optional character display metadata
    */
-  function start(role, speakerName, charImgSrc, playerImg, playerName, onDone) {
+  function start(role, speakerName, charImgSrc, playerImg, playerName, onDone, charMeta = {}) {
     _script = _data[role];
     if (!_script) { if (onDone) onDone(); return; }
 
     _role        = role;
     _speakerName = speakerName;
     _charImg     = charImgSrc;
+    _charMeta    = charMeta || {};
     _playerImg   = playerImg || '';
     _playerName  = playerName || 'Me';
     _onDone      = onDone;
@@ -106,6 +109,8 @@ const Conversation = (() => {
   function setSpeaker(name, imgSrc, who) {
     els.speaker.textContent = name;
     els.portraitFrame.classList.toggle('is-player', who === 'player');
+    els.portraitFrame.classList.toggle('is-cutout', who === 'character' && !!_charMeta.transparent);
+    els.portraitFrame.classList.toggle('is-full-body', who === 'character' && !!_charMeta.fullBody);
     if (imgSrc) {
       els.portrait.src = imgSrc;
       els.portraitFrame.style.visibility = 'visible';

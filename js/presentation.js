@@ -11,6 +11,9 @@ const Presentation = (() => {
   let _assignments = {};  // { role: { char, audioBlob, transcript } }
   let _index       = 0;
   let _onDone      = null;
+  let _timer       = null;
+  let _audio       = null;
+  let _audioUrl    = '';
 
   let _charImgEl   = null;
   let _progressEl  = null;
@@ -24,6 +27,7 @@ const Presentation = (() => {
 
   // assignments: Map of role → { char, audioBlob, transcript }
   function start(assignments, onDone) {
+    _clearPlayback();
     _assignments = assignments;
     _onDone      = onDone;
     _index       = 0;
@@ -37,12 +41,13 @@ const Presentation = (() => {
     const orderedRoles = ROLE_ORDER.filter(r => _assignments[r]);
 
     if (_index >= orderedRoles.length) {
-      if (_onDone) _onDone();
+      _clearPlayback();
+      _finish();
       return;
     }
 
     const role = orderedRoles[_index];
-    const { char, audioBlob } = _assignments[role];
+    const { char, audioBlob, skipped } = _assignments[role];
 
     // Update UI
     _charImgEl.src = Characters.imgUrl(char);
@@ -54,28 +59,73 @@ const Presentation = (() => {
     void _frameEl.offsetWidth;
     _frameEl.classList.add('pop');
 
+    if (skipped) {
+      _queueNext(250);
+      return;
+    }
+
     // Play audio if we have it
     if (audioBlob && audioBlob.size > 0) {
-      const url    = URL.createObjectURL(audioBlob);
-      const audio  = new Audio(url);
-      audio.onended = () => {
-        URL.revokeObjectURL(url);
-        // Pause briefly between members
-        setTimeout(() => { _index++; _showNext(); }, 900);
+      _audioUrl = URL.createObjectURL(audioBlob);
+      _audio    = new Audio(_audioUrl);
+      _audio.onended = () => {
+        _clearPlayback();
+        _queueNext(900);
       };
-      audio.onerror = () => {
-        URL.revokeObjectURL(url);
-        setTimeout(() => { _index++; _showNext(); }, 1200);
+      _audio.onerror = () => {
+        _clearPlayback();
+        _queueNext(1200);
       };
       // Small delay before playing so the animation settles
-      setTimeout(() => audio.play().catch(() => {
-        setTimeout(() => { _index++; _showNext(); }, 1200);
-      }), 500);
+      _timer = setTimeout(() => {
+        _timer = null;
+        _audio.play().catch(() => {
+          _clearPlayback();
+          _queueNext(1200);
+        });
+      }, 500);
     } else {
       // No audio — show for 2 seconds then advance
-      setTimeout(() => { _index++; _showNext(); }, 2000);
+      _queueNext(2000);
     }
   }
 
-  return { init, start };
+  function _queueNext(delay) {
+    clearTimeout(_timer);
+    _timer = setTimeout(() => {
+      _timer = null;
+      _index++;
+      _showNext();
+    }, delay);
+  }
+
+  function _clearPlayback() {
+    clearTimeout(_timer);
+    _timer = null;
+    if (_audio) {
+      try {
+        _audio.pause();
+        _audio.src = '';
+        _audio.load();
+      } catch (_) {}
+      _audio = null;
+    }
+    if (_audioUrl) {
+      URL.revokeObjectURL(_audioUrl);
+      _audioUrl = '';
+    }
+  }
+
+  function skip() {
+    _clearPlayback();
+    _finish();
+  }
+
+  function _finish() {
+    const done = _onDone;
+    _onDone = null;
+    if (done) done();
+  }
+
+  return { init, start, skip };
 })();

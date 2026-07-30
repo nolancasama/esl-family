@@ -2608,5 +2608,125 @@
         "I want to go to a big forest."
       ]
     ]
+  },
+  "f51": {
+    "name": "Roland",
+    "intro": [
+      "Hello!",
+      "My name is Roland.",
+      "I am 42 years old.",
+      "My birthday is May 14th.",
+      "I like training.",
+      "My favorite food is stew.",
+      "My favorite color is blue.",
+      "I protect the castle every day.",
+      "I want to go to England.",
+      "Nice to meet you!"
+    ],
+    "fields": [
+      ["名前", "My name is Roland（ローランド）."],
+      ["年齢", "I am 42 years old."],
+      ["誕生日", "My birthday is May 14th."],
+      ["好きなもの", "I like training."],
+      ["好きな食べ物", "My favorite food is stew."],
+      ["好きな色", "My favorite color is blue."],
+      ["行きたい場所", "I want to go to England."]
+    ]
+  },
+  "f52": {
+    "name": "Cedric",
+    "intro": [
+      "Hello!",
+      "My name is Cedric.",
+      "I am 39 years old.",
+      "My birthday is June 22nd.",
+      "I like reading maps.",
+      "My favorite food is bread.",
+      "My favorite color is green.",
+      "I ride my horse on Sundays.",
+      "I want to go to Ireland.",
+      "Nice to meet you!"
+    ],
+    "fields": [
+      ["名前", "My name is Cedric（セドリック）."],
+      ["年齢", "I am 39 years old."],
+      ["誕生日", "My birthday is June 22nd."],
+      ["好きなもの", "I like reading maps."],
+      ["好きな食べ物", "My favorite food is bread."],
+      ["好きな色", "My favorite color is green."],
+      ["行きたい場所", "I want to go to Ireland."]
+    ]
+  },
+  "f53": {
+    "name": "Malik",
+    "intro": [
+      "Hello!",
+      "My name is Malik.",
+      "I am 40 years old.",
+      "My birthday is September 9th.",
+      "I like running.",
+      "My favorite food is curry.",
+      "My favorite color is red.",
+      "I practice sword fighting on Saturdays.",
+      "I want to go to Australia.",
+      "Nice to meet you!"
+    ],
+    "fields": [
+      ["名前", "My name is Malik（マリック）."],
+      ["年齢", "I am 40 years old."],
+      ["誕生日", "My birthday is September 9th."],
+      ["好きなもの", "I like running."],
+      ["好きな食べ物", "My favorite food is curry."],
+      ["好きな色", "My favorite color is red."],
+      ["行きたい場所", "I want to go to Australia."]
+    ]
+  },
+  "gf51": {
+    "name": "Alden",
+    "intro": [
+      "Hello!",
+      "My name is Alden.",
+      "I am 76 years old.",
+      "My birthday is January 5th.",
+      "I like stories.",
+      "My favorite food is soup.",
+      "My favorite color is red.",
+      "I walk in the garden on Sundays.",
+      "I want to go to Canada.",
+      "Nice to meet you!"
+    ],
+    "fields": [
+      ["名前", "My name is Alden（オールデン）."],
+      ["年齢", "I am 76 years old."],
+      ["誕生日", "My birthday is January 5th."],
+      ["好きなもの", "I like stories."],
+      ["好きな食べ物", "My favorite food is soup."],
+      ["好きな色", "My favorite color is red."],
+      ["行きたい場所", "I want to go to Canada."]
+    ]
+  },
+  "m51": {
+    "name": "Celeste",
+    "intro": [
+      "Hello!",
+      "My name is Celeste.",
+      "I am 38 years old.",
+      "My birthday is July 7th.",
+      "I like stars.",
+      "My favorite food is cake.",
+      "My favorite color is blue.",
+      "I study magic on Fridays.",
+      "I want to go to France.",
+      "Nice to meet you!"
+    ],
+    "fields": [
+      ["名前", "My name is Celeste（セレステ）."],
+      ["年齢", "I am 38 years old."],
+      ["誕生日", "My birthday is July 7th."],
+      ["好きなもの", "I like stars."],
+      ["好きな食べ物", "My favorite food is cake."],
+      ["好きな色", "My favorite color is blue."],
+      ["行きたい場所", "I want to go to France."]
+    ]
   }
 }

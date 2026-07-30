@@ -23,10 +23,10 @@
   // Real-art characters, scoped to a single role's choose step — never shown for any other role.
   const ROLE_CHAR_IDS = {
     brother:     ['g06', 'g08', 'g14', 'g27', 'i02', 'i14', 'i27', 'i41', 'i49'],
-    grandfather: ['g04', 'g19', 'g34', 'g40', 'g42', 'g47', 'g48', 'i01', 'i03', 'i36'],
+    grandfather: ['g04', 'g19', 'g34', 'g40', 'g42', 'g47', 'g48', 'i01', 'i03', 'i36', 'gf51'],
     sister:      ['g05', 'g07', 'g13', 'g18', 'g31', 'g41', 'i18', 'i22', 'i50'],
-    father:      ['g02', 'g15', 'g20', 'g33', 'g39', 'g43', 'i05', 'i21', 'i40', 'i47'],
-    mother:      ['g21', 'g24', 'g28', 'g37', 'g38', 'g46', 'i13', 'i23', 'i37', 'i48'],
+    father:      ['g02', 'g15', 'g20', 'g33', 'g39', 'g43', 'i05', 'i21', 'i40', 'i47', 'f51', 'f52', 'f53'],
+    mother:      ['g21', 'g24', 'g28', 'g37', 'g38', 'g46', 'i13', 'i23', 'i37', 'i48', 'm51'],
     grandmother: ['g03', 'g30', 'g32', 'g36', 'g45', 'g49', 'i28', 'i35', 'i44', 'i46'],
   };
 
@@ -47,6 +47,7 @@
     micOpen:        false,
     playerName:     '',
     talkedTo:       new Set(), // roles the player has finished a conversation with
+    phase:          '',
   };
 
   // ── DOM refs ───────────────────────────────────────────────────────
@@ -85,7 +86,6 @@
   const profileActions = $('profile-actions');
   const profileBackBtn = $('profile-back-btn');
   const profileChooseBtn = $('profile-choose-btn');
-  const progressSegs   = Array.from(document.querySelectorAll('#choose-progress .progress-seg'));
   const chooseHeader   = $('choose-header');
   const chooseSubtitle = $('choose-subtitle');
   const rerollBtn      = $('reroll-btn');
@@ -209,7 +209,6 @@
     Reflection.close();
     stopHintRotation();
     hideMeGlow();
-    familyLineup.innerHTML = '';
 
     showPhase('choose');
     loadChooseStep();
@@ -227,10 +226,7 @@
 
     chooseHeader.textContent = `This is my ${role}.`;
     chooseSubtitle.textContent = `新しい${ROLE_JP[role]}に会いましょう。`;
-    progressSegs.forEach((seg, i) => {
-      seg.classList.toggle('done', i < state.roleIndex);
-      seg.classList.toggle('active', i === state.roleIndex);
-    });
+    renderFamilyLineup();
 
     renderPool();
     updateChooseUI();
@@ -287,7 +283,7 @@
     cardEl.classList.add('selected');
     cardEl.appendChild(makeCheckmark());
 
-    addToLineup(char, role);
+    renderFamilyLineup();
     Profile.say(`This is my ${role}.`);
 
     // Let the checkmark and grammar line land, then move on.
@@ -311,17 +307,33 @@
     return badge;
   }
 
-  function addToLineup(char, role) {
-    const item = document.createElement('div');
-    item.className = 'lineup-member';
-    const img = new Image();
-    img.src = Characters.imgUrl(char);
-    img.alt = role;
-    const label = document.createElement('span');
-    label.textContent = role;
-    item.appendChild(img);
-    item.appendChild(label);
-    familyLineup.appendChild(item);
+  function renderFamilyLineup() {
+    familyLineup.innerHTML = '';
+    SELECT_ORDER.forEach((role, i) => {
+      const item = document.createElement('div');
+      item.className = 'lineup-member';
+      item.classList.toggle('done', i < state.selected.length);
+      item.classList.toggle('active', i === state.roleIndex);
+
+      const portrait = document.createElement('div');
+      portrait.className = 'lineup-portrait';
+
+      const char = state.selected[i];
+      if (char) {
+        portrait.classList.add('filled');
+        const img = new Image();
+        img.src = Characters.imgUrl(char);
+        img.alt = role;
+        portrait.appendChild(img);
+      }
+
+      const label = document.createElement('span');
+      label.textContent = role;
+
+      item.appendChild(portrait);
+      item.appendChild(label);
+      familyLineup.appendChild(item);
+    });
   }
 
   function updateChooseUI() {
@@ -346,11 +358,11 @@
   // ── ═══════════════════════════════════════════════════════════════
   //   PHASE 2 — ASSIGN
   // ══════════════════════════════════════════════════════════════════
-  async function enterAssignPhase() {
+  async function enterAssignPhase(options = {}) {
     showPhase('assign');
 
     // Open mic stream now (keep open for all 6 assignments)
-    if (Recorder.isSupported() && !state.micOpen) {
+    if (!options.skipMic && Recorder.isSupported() && !state.micOpen) {
       try {
         await Recorder.openStream();
         state.micOpen = true;
@@ -699,7 +711,8 @@
         state.talkedTo.add(key);
         startHintRotation();
         refreshMeGlow();
-      }
+      },
+      entry.char
     );
   });
 
@@ -726,10 +739,78 @@
     enterChoosePhase();
   });
 
+  document.addEventListener('keydown', (e) => {
+    if (!e.ctrlKey || !e.shiftKey || e.key.toLowerCase() !== 'd' || e.repeat) return;
+    e.preventDefault();
+    debugSkipCurrentPhase();
+  });
+
+  function debugSkipCurrentPhase() {
+    console.info(`Debug skip: ${state.phase}`);
+    if (state.phase === 'choose') {
+      debugSkipChoosePhase();
+    } else if (state.phase === 'assign') {
+      debugSkipAssignPhase();
+    } else if (state.phase === 'presentation') {
+      Presentation.skip();
+    }
+  }
+
+  function debugSkipChoosePhase() {
+    Profile.close();
+
+    for (let i = state.roleIndex; i < SELECT_ORDER.length; i++) {
+      const role = SELECT_ORDER[i];
+      const char = debugPickCharacter(role);
+      if (!char) continue;
+
+      state.pickedIds.add(char.id);
+      state.selected[i] = char;
+    }
+
+    state.selected = state.selected.slice(0, SELECT_ORDER.length);
+    state.roleIndex = Math.min(state.selected.length, SELECT_ORDER.length);
+    renderFamilyLineup();
+    enterAssignPhase({ skipMic: true });
+  }
+
+  function debugPickCharacter(role) {
+    const all = Characters.getAll();
+    const ids = ROLE_CHAR_IDS[role] || [];
+    return ids
+      .map(id => all.find(c => c.id === id))
+      .find(char => char && !state.pickedIds.has(char.id));
+  }
+
+  function debugSkipAssignPhase() {
+    if (_listening) stopListening();
+    if (state.micOpen) {
+      Recorder.closeStream();
+      state.micOpen = false;
+    }
+
+    for (let i = state.assignIndex; i < state.selected.length; i++) {
+      const role = SELECT_ORDER[i];
+      const char = state.selected[i];
+      if (!role || !char) continue;
+
+      state.assignments[role] = {
+        char,
+        audioBlob: null,
+        transcript: '[debug skipped]',
+        skipped: true,
+      };
+    }
+
+    state.assignIndex = state.selected.length;
+    enterSelfiePhase();
+  }
+
   // ── ═══════════════════════════════════════════════════════════════
   //   Shared helpers
   // ══════════════════════════════════════════════════════════════════
   function showPhase(name) {
+    state.phase = name;
     Object.values(phases).forEach(el => el.classList.remove('active'));
     phases[name].classList.add('active');
   }
