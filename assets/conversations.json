@@ -80,6 +80,9 @@
   },
   "grandmother": {
     "bg": "assets/cottage-bg.jpg",
+    "charBg": {
+      "g32": "assets/bakery-bg.jpg"
+    },
     "greeting": "Oh, hello dear! I am so happy to see you.",
     "questions": [
       {
