@@ -5,11 +5,11 @@
       "g34": "assets/tavern-bg.jpg",
       "g42": "assets/tavern-bg.jpg",
       "i01": "assets/workshop-golem-bg.jpg",
-      "g48": "assets/garden-bg.jpg",
       "i03": "assets/alchemy-bg.jpg",
       "g19": "assets/selfie-bg.jpg",
       "g04": "assets/library-bg.jpg",
-      "g40": "assets/library-bg.jpg"
+      "g40": "assets/library-bg.jpg",
+      "i36": "assets/yard-bg.jpg"
     },
     "greeting": "Hello! Come and sit with me.",
     "questions": [
@@ -88,7 +88,11 @@
     "bg": "assets/cottage-bg.jpg",
     "charBg": {
       "g32": "assets/bakery-bg.jpg",
-      "i44": "assets/alchemy-bg.jpg"
+      "i44": "assets/alchemy-bg.jpg",
+      "g45": "assets/garden-bg.jpg",
+      "g49": "assets/garden-bg.jpg",
+      "i28": "assets/tavern-bg.jpg",
+      "i46": "assets/workshop-golem-bg.jpg"
     },
     "greeting": "Oh, hello dear! I am so happy to see you.",
     "questions": [
@@ -167,8 +171,13 @@
     "bg": "assets/dining-bg.jpg",
     "charBg": {
       "g20": "assets/workshop-missile-bg.jpg",
+      "g39": "assets/workshop-missile-bg.jpg",
+      "i21": "assets/workshop-missile-bg.jpg",
       "i47": "assets/tavern-bg.jpg",
-      "f52": "assets/library-bg.jpg"
+      "f52": "assets/library-bg.jpg",
+      "i05": "assets/yard-bg.jpg",
+      "f51": "assets/yard-bg.jpg",
+      "f53": "assets/yard-bg.jpg"
     },
     "greeting": "Hey! Good to see you. How are you today?",
     "questions": [
@@ -250,7 +259,8 @@
       "i48": "assets/alchemy-bg.jpg",
       "m51": "assets/garden-bg.jpg",
       "g37": "assets/bakery-bg.jpg",
-      "g21": "assets/library-bg.jpg"
+      "g21": "assets/library-bg.jpg",
+      "g24": "assets/yard-bg.jpg"
     },
     "greeting": "Welcome home! Are you hungry?",
     "questions": [
@@ -329,7 +339,8 @@
     "bg": "assets/stable-bg.png",
     "charBg": {
       "i14": "assets/workshop-golem-bg.jpg",
-      "i49": "assets/study-bg.jpg"
+      "i49": "assets/study-bg.jpg",
+      "g27": "assets/yard-bg.jpg"
     },
     "greeting": "Hi! Do you want to play with me?",
     "questions": [
@@ -406,6 +417,14 @@
   },
   "sister": {
     "bg": "assets/selfie-bg.jpg",
+    "charBg": {
+      "g31": "assets/garden-bg.jpg",
+      "g41": "assets/garden-bg.jpg",
+      "g18": "assets/library-bg.jpg",
+      "g13": "assets/library-bg.jpg",
+      "i18": "assets/alchemy-bg.jpg",
+      "i22": "assets/workshop-golem-bg.jpg"
+    },
     "greeting": "Hi! You look nice today.",
     "questions": [
       {
