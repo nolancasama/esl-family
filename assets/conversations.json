@@ -257,7 +257,7 @@
     "charBg": {
       "i23": "assets/alchemy-bg.jpg",
       "i48": "assets/alchemy-bg.jpg",
-      "m51": "assets/garden-bg.jpg",
+      "m51": "assets/observatory-bg.jpg",
       "g37": "assets/bakery-bg.jpg",
       "g21": "assets/library-bg.jpg",
       "g24": "assets/yard-bg.jpg"
@@ -422,8 +422,8 @@
       "g41": "assets/garden-bg.jpg",
       "g18": "assets/library-bg.jpg",
       "g13": "assets/library-bg.jpg",
-      "i18": "assets/alchemy-bg.jpg",
-      "i22": "assets/workshop-golem-bg.jpg"
+      "i18": "assets/observatory-bg.jpg",
+      "i22": "assets/observatory-bg.jpg"
     },
     "greeting": "Hi! You look nice today.",
     "questions": [
