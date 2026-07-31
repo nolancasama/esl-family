@@ -7,7 +7,9 @@
       "i01": "assets/workshop-golem-bg.jpg",
       "g48": "assets/garden-bg.jpg",
       "i03": "assets/alchemy-bg.jpg",
-      "g19": "assets/selfie-bg.jpg"
+      "g19": "assets/selfie-bg.jpg",
+      "g04": "assets/library-bg.jpg",
+      "g40": "assets/library-bg.jpg"
     },
     "greeting": "Hello! Come and sit with me.",
     "questions": [
@@ -165,7 +167,8 @@
     "bg": "assets/dining-bg.jpg",
     "charBg": {
       "g20": "assets/workshop-missile-bg.jpg",
-      "i47": "assets/tavern-bg.jpg"
+      "i47": "assets/tavern-bg.jpg",
+      "f52": "assets/library-bg.jpg"
     },
     "greeting": "Hey! Good to see you. How are you today?",
     "questions": [
@@ -246,7 +249,8 @@
       "i23": "assets/alchemy-bg.jpg",
       "i48": "assets/alchemy-bg.jpg",
       "m51": "assets/garden-bg.jpg",
-      "g37": "assets/bakery-bg.jpg"
+      "g37": "assets/bakery-bg.jpg",
+      "g21": "assets/library-bg.jpg"
     },
     "greeting": "Welcome home! Are you hungry?",
     "questions": [
