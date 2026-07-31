@@ -86,7 +86,10 @@ const Conversation = (() => {
     els.overlay.classList.toggle('intro-linger', hasIntroLinger);
     // The backdrop is always the original artwork. CSS supplies the normal
     // darkening layer, and removes it for a first-visit linger.
-    els.overlay.style.backgroundImage = `url('${_script.bg}')`;
+    // Some characters get their own scene instead of the role's default,
+    // so their conversation feels tailored to who they are.
+    const bg = (_script.charBg && _script.charBg[_charMeta.id]) || _script.bg;
+    els.overlay.style.backgroundImage = `url('${bg}')`;
     els.overlay.classList.add('active');
     Sfx.whoosh();
 

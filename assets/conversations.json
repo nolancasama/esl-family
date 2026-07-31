@@ -1,6 +1,10 @@
 {
   "grandfather": {
     "bg": "assets/study-bg.jpg",
+    "charBg": {
+      "g34": "assets/tavern-bg.jpg",
+      "g42": "assets/tavern-bg.jpg"
+    },
     "greeting": "Hello! Come and sit with me.",
     "questions": [
       {
@@ -151,6 +155,9 @@
   },
   "father": {
     "bg": "assets/dining-bg.jpg",
+    "charBg": {
+      "g20": "assets/workshop-missile-bg.jpg"
+    },
     "greeting": "Hey! Good to see you. How are you today?",
     "questions": [
       {
@@ -226,6 +233,11 @@
   },
   "mother": {
     "bg": "assets/market-bg.jpg",
+    "charBg": {
+      "i23": "assets/alchemy-bg.jpg",
+      "i48": "assets/alchemy-bg.jpg",
+      "m51": "assets/garden-bg.jpg"
+    },
     "greeting": "Welcome home! Are you hungry?",
     "questions": [
       {
@@ -301,6 +313,9 @@
   },
   "brother": {
     "bg": "assets/stable-bg.png",
+    "charBg": {
+      "i14": "assets/workshop-golem-bg.jpg"
+    },
     "greeting": "Hi! Do you want to play with me?",
     "questions": [
       {
