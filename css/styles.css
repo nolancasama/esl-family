@@ -237,13 +237,39 @@ html, body {
 #phase-choose.active       { --scene-img: url('../assets/choose-bg.jpg'); }
 #phase-selfie.active       { --scene-img: url('../assets/selfie-bg.jpg'); }
 #phase-presentation.active { --scene-img: url('../assets/presentation-bg.jpg'); }
+/* The castle's tallest flag sits almost at the very top edge of the
+   source art, so a plain center crop shaves it off on most screens.
+   Anchor to the top instead — the foreground plaza at the bottom has
+   plenty of room to give up instead. */
+#phase-choose.active {
+  background-position: center, center, center top;
+}
 /* On the first arrival after the intro, let the player take in the original
-   selection-scene artwork before the interface and its dark vignette appear. */
+   selection-scene artwork before the interface and its dark vignette appear.
+   The artwork starts zoomed in on the castle and slowly pulls back to
+   reveal the whole kingdom over the linger — a small Ken Burns move.
+   translate (in % of the overlay's own box) re-centers the castle
+   before scaling around the box's own center, same technique as the
+   conversation-scene zooms — a plain transform-origin pivot doesn't
+   actually move content to the center, only pins it in place. */
 #phase-choose.active.intro-linger {
+  background-image: none;
+  overflow: hidden;
+}
+#phase-choose.active.intro-linger::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-image: var(--scene-img);
   background-repeat: no-repeat;
   background-size: cover;
-  background-position: center;
+  background-position: center top;
+  animation: choose-zoom-out 4.5s ease-out both;
+}
+@keyframes choose-zoom-out {
+  0%   { transform: scale(1.7) translate(-13.6%, -2.9%); }  /* the castle gate */
+  22%  { transform: scale(1.7) translate(-13.6%, -2.9%); }
+  100% { transform: scale(1)   translate(0%, 0%); }
 }
 #phase-choose > .rpg-header-panel,
 #phase-choose > .page-body {
@@ -1263,6 +1289,70 @@ html, body {
 }
 #convo-overlay.active { opacity: 1; visibility: visible; }
 #convo-overlay.intro-linger::before { opacity: 0; }
+/* The feast table: start zoomed in on the roast, pan across the spread,
+   then zoom out to reveal the whole hall. translate (in % of the
+   overlay's own box) re-centers each food item before scaling around
+   the box's own center, so the named dish actually sits mid-screen
+   instead of just becoming a fixed pivot point. */
+#convo-overlay.intro-linger.feast-zoom {
+  animation: feast-zoom-pan 5.45s ease-in-out both;
+}
+@keyframes feast-zoom-pan {
+  0%   { transform: scale(2.2) translate(22.3%, -14.9%); }
+  14%  { transform: scale(2.2) translate(22.3%, -14.9%); }
+  60%  { transform: scale(2.2) translate(-14.8%, -24.7%); }
+  100% { transform: scale(1)   translate(0%, 0%); }
+}
+/* The library: start on the armillary sphere and the open manuscript
+   beside it (bottom-left), pan across to the globe and compass-emblem
+   book in the far corner (bottom-right), then zoom out to the whole
+   room. Scale ramps up during the pan (not held constant) because the
+   corner sits much further off-center than the starting pair, and a
+   fixed low zoom would expose empty space past the image edge there. */
+#convo-overlay.intro-linger.library-zoom {
+  animation: library-zoom-pan 5.5s ease-in-out both;
+}
+@keyframes library-zoom-pan {
+  0%   { transform: scale(1.5) translate(16.5%, -15.3%); }  /* armillary sphere + open book */
+  30%  { transform: scale(1.5) translate(16.5%, -15.3%); }
+  100% { transform: scale(1)   translate(0%, 0%); }          /* zoom out to the whole room */
+}
+/* The workshop: start zoomed in on the mechanical arm (framed so the
+   whole arm fits in shot), hold, then zoom out to reveal the room. */
+#convo-overlay.intro-linger.workshop-zoom {
+  animation: workshop-cinematic 4s ease-in-out both;
+}
+@keyframes workshop-cinematic {
+  0%   { transform: scale(1.6) translate(3.8%, 4.5%); }  /* mechanical arm, held */
+  30%  { transform: scale(1.6) translate(3.8%, 4.5%); }
+  100% { transform: scale(1)   translate(0%, 0%); }        /* zoom out to the whole room */
+}
+/* A handful of soft, slowly drifting motes standing in for dust caught
+   in the workshop light. Purely decorative — layered above the scene,
+   below the (hidden, during this sequence) dialogue UI. */
+#convo-overlay.intro-linger.workshop-zoom::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(255,235,190,.55) 0%, rgba(255,235,190,0) 70%),
+    radial-gradient(circle, rgba(255,235,190,.4)  0%, rgba(255,235,190,0) 70%),
+    radial-gradient(circle, rgba(255,235,190,.5)  0%, rgba(255,235,190,0) 70%),
+    radial-gradient(circle, rgba(255,235,190,.35) 0%, rgba(255,235,190,0) 70%),
+    radial-gradient(circle, rgba(255,235,190,.45) 0%, rgba(255,235,190,0) 70%),
+    radial-gradient(circle, rgba(255,235,190,.3)  0%, rgba(255,235,190,0) 70%);
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 4px 4px, 6px 6px, 3px 3px, 5px 5px, 4px 4px;
+  background-position:
+    22% 38%, 61% 55%, 78% 30%, 35% 62%, 68% 70%, 48% 45%;
+  animation: workshop-dust-drift 7s ease-in-out infinite;
+}
+@keyframes workshop-dust-drift {
+  0%   { opacity: .5; transform: translateY(0); }
+  50%  { opacity: .9; transform: translateY(-16px); }
+  100% { opacity: .5; transform: translateY(0); }
+}
 #convo-overlay.intro-linger #convo-layout,
 #convo-overlay.intro-linger #convo-close-btn {
   opacity: 0;

@@ -9,7 +9,7 @@
 
   // Order family members are picked in, one at a time.
   const SELECT_ORDER = ['grandfather', 'father', 'brother', 'grandmother', 'mother', 'sister'];
-  const CHOOSE_INTRO_LINGER_MS = 2500;
+  const CHOOSE_INTRO_LINGER_MS = 4000;
   const SCENE_FADE_MS = 500;
 
   // Japanese role names, used for the choose-screen narration line.

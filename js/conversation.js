@@ -18,6 +18,14 @@ const Conversation = (() => {
   const AUTO_REACTION_WORD_MS = 650;
   const INTRO_LINGER_MS = 2500;
   const OVERLAY_FADE_IN_MS = 450;
+  // Some scenes get a slower reveal (zoom in on a detail, pan across, then
+  // zoom out) so they need more time than the usual linger. Keyed by the
+  // background path; each maps to the CSS class that drives its animation.
+  const SPECIAL_ZOOM_SCENES = {
+    'assets/dining-bg.jpg':         { cls: 'feast-zoom',    ms: 5000 },
+    'assets/library-bg.jpg':        { cls: 'library-zoom',  ms: 5500 },
+    'assets/workshop-golem-bg.jpg': { cls: 'workshop-zoom', ms: 3550 },
+  };
 
   let _data   = {};
   let els     = {};
@@ -90,18 +98,22 @@ const Conversation = (() => {
     // so their conversation feels tailored to who they are.
     const bg = (_script.charBg && _script.charBg[_charMeta.id]) || _script.bg;
     els.overlay.style.backgroundImage = `url('${bg}')`;
+    const specialZoom = SPECIAL_ZOOM_SCENES[bg];
+    Object.values(SPECIAL_ZOOM_SCENES).forEach(z => els.overlay.classList.remove(z.cls));
+    if (specialZoom) els.overlay.classList.add(specialZoom.cls);
     els.overlay.classList.add('active');
     Sfx.whoosh();
 
     clearTimeout(_timer);
     if (hasIntroLinger) {
       // Count only after the overlay fade has completed, so the scene stays
-      // bright and free of dialogue for the full requested 2.5 seconds.
+      // bright and free of dialogue for the full requested linger.
+      const lingerMs = specialZoom ? specialZoom.ms : INTRO_LINGER_MS;
       _timer = setTimeout(() => {
         if (!_open) return;
         els.overlay.classList.remove('intro-linger');
         showCharacterLine(_script.greeting, () => askQuestion(0));
-      }, OVERLAY_FADE_IN_MS + INTRO_LINGER_MS);
+      }, OVERLAY_FADE_IN_MS + lingerMs);
     } else {
       // Greeting, then the first question.
       showCharacterLine(_script.greeting, () => askQuestion(0));
