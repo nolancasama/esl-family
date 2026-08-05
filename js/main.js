@@ -132,6 +132,11 @@
   await Promise.all([Characters.load(), Profile.load(), Conversation.load()]);
   loadingScreen.style.display = 'none';
 
+  // Warm every family-selection card's portrait now, during the intro's
+  // typewriter dialogue, so the choose phase's cards are already decoded
+  // and cached by the time the player reaches them instead of popping in.
+  Characters.getAll().forEach(char => { new Image().src = Characters.imgUrl(char); });
+
   // Warm the bedroom backdrop so the reflection scene fades in already painted.
   new Image().src = 'assets/bedroom-bg.jpg';
 
