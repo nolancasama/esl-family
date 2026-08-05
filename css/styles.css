@@ -1316,6 +1316,48 @@ html, body {
   30%  { transform: scale(1.5) translate(16.5%, -15.3%); }
   100% { transform: scale(1)   translate(0%, 0%); }          /* zoom out to the whole room */
 }
+/* Other first-visit scenes use the library's 5.5s pacing: hold on the
+   important part of the illustration, then pull back to the complete scene. */
+#convo-overlay.intro-linger.market-zoom {
+  animation: market-zoom-out 5.5s ease-in-out both;
+}
+@keyframes market-zoom-out {
+  0%   { transform: scale(1.6) translate(0%, -10%); }  /* the centre fountain */
+  30%  { transform: scale(1.6) translate(0%, -10%); }
+  100% { transform: scale(1)   translate(0%, 0%); }
+}
+#convo-overlay.intro-linger.garden-party-zoom {
+  animation: garden-party-zoom-out 5.5s ease-in-out both;
+}
+@keyframes garden-party-zoom-out {
+  0%   { transform: scale(1.65) translate(-15.8%, -5.6%); } /* the three people at the table */
+  30%  { transform: scale(1.65) translate(-15.8%, -5.6%); }
+  100% { transform: scale(1)    translate(0%, 0%); }
+}
+#convo-overlay.intro-linger.observatory-zoom {
+  animation: observatory-zoom-out 5.5s ease-in-out both;
+}
+@keyframes observatory-zoom-out {
+  0%   { transform: scale(1.7) translate(-16%, -5%); } /* the star throne */
+  30%  { transform: scale(1.7) translate(-16%, -5%); }
+  100% { transform: scale(1)   translate(0%, 0%); }
+}
+#convo-overlay.intro-linger.cottage-zoom {
+  animation: cottage-zoom-out 5.5s ease-in-out both;
+}
+@keyframes cottage-zoom-out {
+  0%   { transform: scale(1.6) translate(4%, -9%); } /* the little bridge */
+  30%  { transform: scale(1.6) translate(4%, -9%); }
+  100% { transform: scale(1)   translate(0%, 0%); }
+}
+#convo-overlay.intro-linger.study-zoom {
+  animation: study-zoom-out 5.5s ease-in-out both;
+}
+@keyframes study-zoom-out {
+  0%   { transform: scale(1.65) translate(0%, 2%); } /* the open doorway */
+  30%  { transform: scale(1.65) translate(0%, 2%); }
+  100% { transform: scale(1)    translate(0%, 0%); }
+}
 /* The workshop: start zoomed in on the mechanical arm (framed so the
    whole arm fits in shot), hold, then zoom out to reveal the room. */
 #convo-overlay.intro-linger.workshop-zoom {

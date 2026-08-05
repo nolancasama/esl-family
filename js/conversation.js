@@ -25,6 +25,13 @@ const Conversation = (() => {
     'assets/dining-bg.jpg':         { cls: 'feast-zoom',    ms: 5000 },
     'assets/library-bg.jpg':        { cls: 'library-zoom',  ms: 5500 },
     'assets/workshop-golem-bg.jpg': { cls: 'workshop-zoom', ms: 3550 },
+    // These use the same unhurried reveal as the library, with a focal point
+    // chosen for the important detail in each picture.
+    'assets/market-bg.jpg':         { cls: 'market-zoom',      ms: 5500 },
+    'assets/garden-bg.jpg':         { cls: 'garden-party-zoom', ms: 5500 },
+    'assets/observatory-bg.jpg':    { cls: 'observatory-zoom', ms: 5500 },
+    'assets/cottage-bg.jpg':        { cls: 'cottage-zoom',     ms: 5500 },
+    'assets/study-bg.jpg':          { cls: 'study-zoom',       ms: 5500 },
   };
 
   let _data   = {};
