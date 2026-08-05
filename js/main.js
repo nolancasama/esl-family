@@ -134,8 +134,14 @@
 
   // Warm every family-selection card's portrait now, during the intro's
   // typewriter dialogue, so the choose phase's cards are already decoded
-  // and cached by the time the player reaches them instead of popping in.
-  Characters.getAll().forEach(char => { new Image().src = Characters.imgUrl(char); });
+  // and cached by the time the player reaches them instead of painting in
+  // progressively. Just setting .src only fetches the bytes — decode()
+  // forces the browser to fully rasterize the bitmap ahead of time too.
+  Characters.getAll().forEach(char => {
+    const img = new Image();
+    img.src = Characters.imgUrl(char);
+    if (img.decode) img.decode().catch(() => {});
+  });
 
   // Warm the bedroom backdrop so the reflection scene fades in already painted.
   new Image().src = 'assets/bedroom-bg.jpg';

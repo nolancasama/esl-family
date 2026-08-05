@@ -1298,10 +1298,9 @@ html, body {
   animation: feast-zoom-pan 5.45s ease-in-out both;
 }
 @keyframes feast-zoom-pan {
-  0%   { transform: scale(2.2) translate(22.3%, -14.9%); }
-  14%  { transform: scale(2.2) translate(22.3%, -14.9%); }
-  60%  { transform: scale(2.2) translate(-14.8%, -24.7%); }
-  100% { transform: scale(1)   translate(0%, 0%); }
+  0%   { transform: scale(2.2) translate(22.3%, -14.9%); }  /* the roast turkey */
+  30%  { transform: scale(2.2) translate(22.3%, -14.9%); }
+  100% { transform: scale(1)   translate(0%, 0%); }          /* zoom out to the whole hall */
 }
 /* The library: start on the armillary sphere and the open manuscript
    beside it (bottom-left), pan across to the globe and compass-emblem
