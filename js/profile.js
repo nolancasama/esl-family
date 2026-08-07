@@ -7,6 +7,10 @@
 
 const Profile = (() => {
 
+  // Narration is supplied as recorded clips. Keep browser-generated speech
+  // disabled so it never overlaps or substitutes for those recordings.
+  const TTS_ENABLED = false;
+
   let _profiles  = {};
   let els        = {};
   let _onConfirm = null;
@@ -80,7 +84,7 @@ const Profile = (() => {
 
   // Speak a one-off line (used for the target grammar sentence on confirm).
   function say(text) {
-    if (!('speechSynthesis' in window)) return;
+    if (!TTS_ENABLED || !('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);

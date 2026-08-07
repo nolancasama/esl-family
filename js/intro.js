@@ -7,6 +7,17 @@
 const Intro = (() => {
 
   const TYPE_MS = 55; // ms per character
+  const MYSTERIOUS_VOICE_AUDIO = [
+    'assets/audio/mysterious-voice/01-hello.mp3',
+    'assets/audio/mysterious-voice/02-understand.mp3',
+    'assets/audio/mysterious-voice/03-good.mp3',
+    'assets/audio/mysterious-voice/04-name.mp3',
+    'assets/audio/mysterious-voice/05-welcome.mp3',
+    'assets/audio/mysterious-voice/06-new-world.mp3',
+    'assets/audio/mysterious-voice/07-no-return.mp3',
+    'assets/audio/mysterious-voice/08-new-life.mp3',
+    'assets/audio/mysterious-voice/09-choose-family.mp3',
+  ];
 
   // Each step: { text } for a line, plus one of:
   //   button: 'はい'  → shows a button; click advances
@@ -16,15 +27,15 @@ const Intro = (() => {
     { speaker: 'あなた', text: '「ここはどこ？」' },
     { speaker: 'あなた', text: '「さっきまで、松原市のベッドで寝ていたのに……」' },
     { speaker: 'ナレーション', text: 'どこからか、不思議な声が聞こえる……' },
-    { speaker: '不思議な声', text: '「こんにちは。」' },
-    { speaker: '不思議な声', text: '「わかりますか？」', button: 'はい' },
-    { speaker: '不思議な声', text: '「よかった。」' },
-    { speaker: '不思議な声', text: '「あなたの名前を教えてください。」', input: true },
-    { speaker: '不思議な声', name: true }, // 「ようこそ、○○。」— built from the entered name
-    { speaker: '不思議な声', text: '「あなたは異世界へやって来ました。」' },
-    { speaker: '不思議な声', text: '「もう元の世界へ戻ることはできません。」' },
-    { speaker: '不思議な声', text: '「新しい人生を始めるために……」' },
-    { speaker: '不思議な声', text: '「新しい家族を選んでください。」' },
+    { speaker: '不思議な声', text: '「こんにちは。」', voiceIndex: 0 },
+    { speaker: '不思議な声', text: '「わかりますか？」', button: 'はい', voiceIndex: 1 },
+    { speaker: '不思議な声', text: '「よかった。」', voiceIndex: 2 },
+    { speaker: '不思議な声', text: '「あなたの名前を教えてください。」', input: true, voiceIndex: 3 },
+    { speaker: '不思議な声', name: true, voiceIndex: 4 }, // 「ようこそ、○○。」— built from the entered name
+    { speaker: '不思議な声', text: '「あなたは異世界へやって来ました。」', voiceIndex: 5 },
+    { speaker: '不思議な声', text: '「もう元の世界へ戻ることはできません。」', voiceIndex: 6 },
+    { speaker: '不思議な声', text: '「新しい人生を始めるために……」', voiceIndex: 7 },
+    { speaker: '不思議な声', text: '「新しい家族を選んでください。」', voiceIndex: 8 },
   ];
 
   let els        = {};
@@ -34,6 +45,7 @@ const Intro = (() => {
   let typeTimer  = null;
   let playerName = '';
   let completeCurrent = () => {};
+  let voiceAudio = null;
 
   const MAX_NAME_LENGTH = 16;
 
@@ -64,6 +76,7 @@ const Intro = (() => {
   }
 
   function start(doneCallback) {
+    stopVoiceAudio();
     onDone     = doneCallback;
     stepIndex  = 0;
     playerName = '';
@@ -82,12 +95,35 @@ const Intro = (() => {
     els.hint.style.display = (step.button || step.input) ? 'none' : '';
     const line = step.name ? `「ようこそ、${playerName}。」` : step.text;
     const text = step.speaker ? `${step.speaker}：\n${line}` : line;
+    if (Number.isInteger(step.voiceIndex)) playVoiceAudio(MYSTERIOUS_VOICE_AUDIO[step.voiceIndex]);
+    else stopVoiceAudio();
 
     typeLine(text, () => {
       if (step.button)      { els.yesBtn.style.display = ''; }
       else if (step.input)  { els.inputWrap.style.display = ''; els.nameInput.focus(); }
       // otherwise: wait for a generic tap to advance
     });
+  }
+
+  function playVoiceAudio(src) {
+    stopVoiceAudio();
+    if (!src) return;
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    voiceAudio = audio;
+    audio.addEventListener('ended', () => {
+      if (voiceAudio === audio) voiceAudio = null;
+    });
+    // Each voiced line follows a player action, but keep the game usable if a
+    // browser still declines playback for any reason.
+    audio.play().catch(() => {});
+  }
+
+  function stopVoiceAudio() {
+    if (!voiceAudio) return;
+    voiceAudio.pause();
+    voiceAudio.currentTime = 0;
+    voiceAudio = null;
   }
 
   function typeLine(text, onComplete) {
@@ -205,11 +241,13 @@ const Intro = (() => {
 
   function skip() {
     clearInterval(typeTimer);
+    stopVoiceAudio();
     finish();
   }
 
   function finish() {
     clearInterval(typeTimer);
+    stopVoiceAudio();
     const name = playerName;
     if (onDone) onDone(name);
   }

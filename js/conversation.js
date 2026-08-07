@@ -34,6 +34,30 @@ const Conversation = (() => {
     'assets/study-bg.jpg':          { cls: 'study-zoom',       ms: 5500 },
   };
 
+  // Conversation scenes have no background music for now (disabled, not
+  // removed — flip this back on to resume using the tailored presets below).
+  const MUSIC_ENABLED = false;
+
+  // Every conversation background gets its own tailored Ambient preset
+  // (js/ambient.js), whether or not it also has a SPECIAL_ZOOM_SCENES entry.
+  const BG_AMBIENT = {
+    'assets/dining-bg.jpg':            'feast',
+    'assets/library-bg.jpg':           'library',
+    'assets/workshop-golem-bg.jpg':    'workshop',
+    'assets/workshop-missile-bg.jpg':  'workshopMissile',
+    'assets/market-bg.jpg':            'market',
+    'assets/garden-bg.jpg':            'gardenParty',
+    'assets/observatory-bg.jpg':       'observatory',
+    'assets/cottage-bg.jpg':           'cottage',
+    'assets/study-bg.jpg':             'study',
+    'assets/tavern-bg.jpg':            'tavern',
+    'assets/alchemy-bg.jpg':           'alchemy',
+    'assets/bakery-bg.jpg':            'bakery',
+    'assets/yard-bg.jpg':              'yard',
+    'assets/selfie-bg.jpg':            'roseGarden',
+    'assets/stable-bg.png':            'stable',
+  };
+
   let _data   = {};
   let els     = {};
   let _onDone = null;
@@ -110,6 +134,7 @@ const Conversation = (() => {
     if (specialZoom) els.overlay.classList.add(specialZoom.cls);
     els.overlay.classList.add('active');
     Sfx.whoosh();
+    if (MUSIC_ENABLED) Ambient.start(BG_AMBIENT[bg] || 'choose');
 
     clearTimeout(_timer);
     if (hasIntroLinger) {
@@ -281,6 +306,9 @@ const Conversation = (() => {
     Sfx.whoosh(true);
     els.overlay.classList.remove('active', 'intro-linger');
     clearAnswers();
+    // Conversations are only ever opened from the family photo wall, so
+    // that's always the right music to resume on close.
+    if (MUSIC_ENABLED) Ambient.start('photoWall');
     const done = _onDone;
     _onDone = null;
     if (done) done(completed);

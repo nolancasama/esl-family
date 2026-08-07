@@ -4,8 +4,8 @@
  * family member. The player sits in their castle bedroom, thinks back over
  * the day, picks how they feel, and the story closes.
  *
- * Also owns Ambient — a small synthesized music bed (no audio assets), so
- * the scene has something calm playing under it.
+ * Background music is Ambient (js/ambient.js), started with the
+ * 'reflection' preset.
  */
 
 const Reflection = (() => {
@@ -69,7 +69,7 @@ const Reflection = (() => {
     }
 
     els.overlay.classList.add('active');
-    Ambient.start();
+    Ambient.start('reflection');
 
     step(0);
   }
@@ -186,106 +186,4 @@ const Reflection = (() => {
   }
 
   return { init, start, isOpen, close };
-})();
-
-
-/* ── Ambient music bed ──────────────────────────────────────────────
-   A slow I–V–vi–IV progression on soft sine voices with a long attack
-   and release, plus a gentle delay. Entirely synthesized, so the scene
-   gets calm background music without shipping an audio file.           */
-const Ambient = (() => {
-
-  // I–V–vi–IV in C, voiced low and wide so it stays out of the way.
-  const CHORDS = [
-    [261.63, 329.63, 392.00],  // C  major
-    [196.00, 293.66, 392.00],  // G  major
-    [220.00, 261.63, 329.63],  // A  minor
-    [174.61, 261.63, 349.23],  // F  major
-  ];
-  const CHORD_MS = 4200;
-
-  let _ctx    = null;
-  let _master = null;
-  let _timer  = null;
-  let _step   = 0;
-
-  function start() {
-    stop();
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    try {
-      _ctx = new AC();
-      if (_ctx.state === 'suspended') _ctx.resume();
-
-      _master = _ctx.createGain();
-      _master.gain.setValueAtTime(0.0001, _ctx.currentTime);
-      _master.gain.exponentialRampToValueAtTime(0.10, _ctx.currentTime + 3);
-
-      // Soft echo, for a little air around the chords.
-      const delay = _ctx.createDelay(1.0);
-      delay.delayTime.value = 0.42;
-      const feedback = _ctx.createGain();
-      feedback.gain.value = 0.28;
-      const tone = _ctx.createBiquadFilter();
-      tone.type = 'lowpass';
-      tone.frequency.value = 1800;
-
-      _master.connect(tone);
-      tone.connect(_ctx.destination);
-      tone.connect(delay);
-      delay.connect(feedback);
-      feedback.connect(delay);
-      delay.connect(_ctx.destination);
-
-      _step = 0;
-      playChord();
-      _timer = setInterval(playChord, CHORD_MS);
-    } catch (_) { _ctx = null; }
-  }
-
-  function playChord() {
-    if (!_ctx || !_master) return;
-    const now = _ctx.currentTime;
-    const chord = CHORDS[_step % CHORDS.length];
-    _step++;
-
-    chord.forEach((freq, i) => {
-      const osc  = _ctx.createOscillator();
-      const gain = _ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      // Stagger the voices slightly so the chord blooms instead of stabbing.
-      const t0 = now + i * 0.12;
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.linearRampToValueAtTime(0.22, t0 + 1.4);          // slow swell
-      gain.gain.linearRampToValueAtTime(0.0001, t0 + CHORD_MS / 1000);
-      osc.connect(gain);
-      gain.connect(_master);
-      osc.start(t0);
-      osc.stop(t0 + CHORD_MS / 1000 + 0.2);
-    });
-  }
-
-  function fadeOut(ms) {
-    if (!_ctx || !_master) return;
-    try {
-      const now = _ctx.currentTime;
-      _master.gain.cancelScheduledValues(now);
-      _master.gain.setValueAtTime(_master.gain.value, now);
-      _master.gain.exponentialRampToValueAtTime(0.0001, now + ms / 1000);
-    } catch (_) {}
-    clearInterval(_timer);
-    _timer = null;
-    setTimeout(stop, ms + 200);
-  }
-
-  function stop() {
-    clearInterval(_timer);
-    _timer = null;
-    if (_ctx) { try { _ctx.close(); } catch (_) {} }
-    _ctx = null;
-    _master = null;
-  }
-
-  return { start, fadeOut, stop };
 })();

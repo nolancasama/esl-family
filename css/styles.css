@@ -973,6 +973,7 @@ html, body {
   color: #4A3620;
   font-size: .85rem;
   font-weight: 800;
+  font-family: inherit;
   padding: 8px 14px;
   border-radius: 16px;
   border: 2px solid rgba(0,0,0,.1);
@@ -998,8 +999,12 @@ html, body {
 #hint-bubble.visible {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
+  cursor: pointer;
   animation: hint-bob 1.6s ease-in-out infinite;
 }
+#hint-bubble.visible:hover { background: #FFF9E9; }
+#hint-bubble.visible:active { transform: translate(-50%, calc(-100% - 12px)); }
 @keyframes hint-bob {
   0%, 100% { transform: translate(-50%, calc(-100% - 14px)); }
   50%      { transform: translate(-50%, calc(-100% - 20px)); }

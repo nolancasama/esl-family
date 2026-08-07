@@ -12,6 +12,13 @@
   const CHOOSE_INTRO_LINGER_MS = 4000;
   const SCENE_FADE_MS = 500;
 
+  // Phases with their own background music. Only intro and the reflection
+  // epilogue (handled separately, in reflection.js) currently play music —
+  // choose/photo are disabled for now (not removed: their presets are
+  // still defined in ambient.js, so add 'choose'/'photo' back here to
+  // re-enable them).
+  const PHASE_AMBIENT = { intro: 'intro' };
+
   // Japanese role names, used for the choose-screen narration line.
   const ROLE_JP = {
     grandfather: 'おじいさん',
@@ -34,6 +41,14 @@
 
   // How many candidates are shown per choose-phase screen.
   const POOL_SIZE = 3;
+  const THIS_IS_MY_AUDIO = {
+    grandfather: 'assets/audio/this-is-my/01-grandfather.mp3',
+    grandmother: 'assets/audio/this-is-my/02-grandmother.mp3',
+    father:      'assets/audio/this-is-my/03-father.mp3',
+    mother:      'assets/audio/this-is-my/04-mother.mp3',
+    brother:     'assets/audio/this-is-my/05-brother.mp3',
+    sister:      'assets/audio/this-is-my/06-sister.mp3',
+  };
 
   // ── State ─────────────────────────────────────────────────────────
   const state = {
@@ -317,17 +332,35 @@
     cardEl.classList.add('selected');
     cardEl.appendChild(makeCheckmark());
 
-    Profile.say(`This is my ${role}.`);
-
-    // Let the checkmark and grammar line land, then move on.
-    setTimeout(() => {
+    const advanceChooseStep = () => {
       state.roleIndex++;
       if (state.roleIndex < SELECT_ORDER.length) {
         loadChooseStep();
       } else {
         enterAssignPhase();
       }
-    }, 1700);
+    };
+
+    // The supplied narrator clip replaces browser TTS for this grammar line.
+    playThisIsMyAudio(role, advanceChooseStep);
+  }
+
+  function playThisIsMyAudio(role, onDone) {
+    const src = THIS_IS_MY_AUDIO[role];
+    if (!src) { setTimeout(onDone, 1700); return; }
+
+    const audio = new Audio(src);
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(fallback);
+      onDone();
+    };
+    const fallback = setTimeout(finish, 3500);
+    audio.addEventListener('ended', finish, { once: true });
+    audio.addEventListener('error', finish, { once: true });
+    audio.play().catch(finish);
   }
 
   function makeCheckmark() {
@@ -727,11 +760,10 @@
 
   function hideMeGlow() { meGlow.classList.remove('visible'); }
 
-  // Tap a framed portrait on the final photo to talk with that family member.
-  photoCanvas.addEventListener('click', (e) => {
-    if (Conversation.isOpen() || Reflection.isOpen()) return;
-    const key = Photo.getCardAt(photoCanvas, e.clientX, e.clientY);
-    if (!key) return;
+  // Activate one card on the final photo. Both the portrait itself and the
+  // rotating "Let's talk!" bubble use this exact path.
+  function activatePhotoCard(key) {
+    if (!key || Conversation.isOpen() || Reflection.isOpen()) return;
     Photo.pulseCard(photoCanvas, key);
 
     // The player's own frame: once everyone has been met, it leads to the
@@ -772,6 +804,18 @@
       entry.char,
       { hasIntroLinger }
     );
+  }
+
+  // Tap a framed portrait on the final photo to talk with that family member.
+  photoCanvas.addEventListener('click', (e) => {
+    const key = Photo.getCardAt(photoCanvas, e.clientX, e.clientY);
+    activatePhotoCard(key);
+  });
+
+  hintBubble.addEventListener('click', () => {
+    // The key is set at the same moment the visible bubble is positioned, so
+    // it always opens the exact family member the bubble is attached to.
+    activatePhotoCard(_hintKey);
   });
 
   // ── ═══════════════════════════════════════════════════════════════
@@ -884,6 +928,12 @@
     state.phase = name;
     Object.values(phases).forEach(el => el.classList.remove('active'));
     phases[name].classList.add('active');
+
+    if (PHASE_AMBIENT[name]) {
+      Ambient.start(PHASE_AMBIENT[name]);
+    } else {
+      Ambient.stop();
+    }
   }
 
   // Fades to white, runs the phase switch while the screen is fully white,
