@@ -43,12 +43,14 @@
   const POOL_SIZE = 3;
   const THIS_IS_MY_AUDIO = {
     grandfather: 'assets/audio/this-is-my/01-grandfather.mp3',
-    grandmother: 'assets/audio/this-is-my/02-grandmother.mp3',
-    father:      'assets/audio/this-is-my/03-father.mp3',
-    mother:      'assets/audio/this-is-my/04-mother.mp3',
-    brother:     'assets/audio/this-is-my/05-brother.mp3',
+    father:      'assets/audio/this-is-my/02-grandmother.mp3',
+    brother:     'assets/audio/this-is-my/03-father.mp3',
+    grandmother: 'assets/audio/this-is-my/04-mother.mp3',
+    mother:      'assets/audio/this-is-my/05-brother.mp3',
     sister:      'assets/audio/this-is-my/06-sister.mp3',
   };
+  const FAMILY_SELECTION_MUSIC = 'assets/audio/family-selection.mp3';
+  const FAMILY_PHOTO_WALL_MUSIC = 'assets/audio/family-photo-wall.mp3';
 
   // ── State ─────────────────────────────────────────────────────────
   const state = {
@@ -69,6 +71,82 @@
     phase:          '',
   };
   let chooseIntroLingerTimer = null;
+  let selectionMusic = null;
+  let selectionMusicWanted = false;
+  let selectionMusicRetryBound = false;
+  let photoWallMusic = null;
+  let photoWallMusicWanted = false;
+  let photoWallMusicRetryBound = false;
+
+  function getSelectionMusic() {
+    if (selectionMusic) return selectionMusic;
+    selectionMusic = new Audio(FAMILY_SELECTION_MUSIC);
+    selectionMusic.preload = 'auto';
+    selectionMusic.loop = true; // Native looping restarts at the beginning without a gap.
+    selectionMusic.volume = 0.38;
+    return selectionMusic;
+  }
+
+  function startSelectionMusic() {
+    selectionMusicWanted = true;
+    const audio = getSelectionMusic();
+    if (!audio.paused) return;
+    audio.play().catch(() => {
+      // Browsers may require one more direct gesture after the transition.
+      // The next tap/key on the selection screen resumes the same track.
+      if (selectionMusicRetryBound) return;
+      selectionMusicRetryBound = true;
+      const retry = () => {
+        document.removeEventListener('pointerdown', retry);
+        document.removeEventListener('keydown', retry);
+        selectionMusicRetryBound = false;
+        if (selectionMusicWanted) startSelectionMusic();
+      };
+      document.addEventListener('pointerdown', retry, { once: true, passive: true });
+      document.addEventListener('keydown', retry, { once: true });
+    });
+  }
+
+  function stopSelectionMusic() {
+    selectionMusicWanted = false;
+    if (!selectionMusic) return;
+    selectionMusic.pause();
+    selectionMusic.currentTime = 0;
+  }
+
+  function getPhotoWallMusic() {
+    if (photoWallMusic) return photoWallMusic;
+    photoWallMusic = new Audio(FAMILY_PHOTO_WALL_MUSIC);
+    photoWallMusic.preload = 'auto';
+    photoWallMusic.loop = true;
+    photoWallMusic.volume = 0.38;
+    return photoWallMusic;
+  }
+
+  function startPhotoWallMusic() {
+    photoWallMusicWanted = true;
+    const audio = getPhotoWallMusic();
+    if (!audio.paused) return;
+    audio.play().catch(() => {
+      if (photoWallMusicRetryBound) return;
+      photoWallMusicRetryBound = true;
+      const retry = () => {
+        document.removeEventListener('pointerdown', retry);
+        document.removeEventListener('keydown', retry);
+        photoWallMusicRetryBound = false;
+        if (photoWallMusicWanted) startPhotoWallMusic();
+      };
+      document.addEventListener('pointerdown', retry, { once: true, passive: true });
+      document.addEventListener('keydown', retry, { once: true });
+    });
+  }
+
+  function stopPhotoWallMusic() {
+    photoWallMusicWanted = false;
+    if (!photoWallMusic) return;
+    photoWallMusic.pause();
+    photoWallMusic.currentTime = 0;
+  }
 
   // ── DOM refs ───────────────────────────────────────────────────────
   const $ = id => document.getElementById(id);
@@ -772,6 +850,7 @@
       if (allFamilyTalkedTo()) {
         stopHintRotation();
         hideMeGlow();
+        stopPhotoWallMusic();
         enterReflection();
       }
       return;
@@ -782,6 +861,7 @@
 
     stopHintRotation();
     hideMeGlow();
+    stopPhotoWallMusic();
     const speakerName = Profile.displayNameWithReading(entry.char.id)
                      || Profile.displayName(entry.char.id)
                      || capitalize(key);
@@ -798,6 +878,10 @@
           state.talkedTo.add(key);
           refreshCompletionMarks();
         }
+        // Conversation ambience is no longer needed once the player returns
+        // to the wall; resume the wall's own recorded music instead.
+        Ambient.stop();
+        startPhotoWallMusic();
         startHintRotation();
         refreshMeGlow();
       },
@@ -934,6 +1018,12 @@
     } else {
       Ambient.stop();
     }
+
+    if (name === 'choose') startSelectionMusic();
+    else stopSelectionMusic();
+
+    if (name === 'photo') startPhotoWallMusic();
+    else stopPhotoWallMusic();
   }
 
   // Fades to white, runs the phase switch while the screen is fully white,
