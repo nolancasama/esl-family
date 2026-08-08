@@ -43,14 +43,16 @@
   const POOL_SIZE = 3;
   const THIS_IS_MY_AUDIO = {
     grandfather: 'assets/audio/this-is-my/01-grandfather.mp3',
-    father:      'assets/audio/this-is-my/02-grandmother.mp3',
-    brother:     'assets/audio/this-is-my/03-father.mp3',
-    grandmother: 'assets/audio/this-is-my/04-mother.mp3',
-    mother:      'assets/audio/this-is-my/05-brother.mp3',
+    grandmother: 'assets/audio/this-is-my/02-grandmother.mp3',
+    father:      'assets/audio/this-is-my/03-father.mp3',
+    mother:      'assets/audio/this-is-my/04-mother.mp3',
+    brother:     'assets/audio/this-is-my/05-brother.mp3',
     sister:      'assets/audio/this-is-my/06-sister.mp3',
   };
   const FAMILY_SELECTION_MUSIC = 'assets/audio/family-selection.mp3';
   const FAMILY_PHOTO_WALL_MUSIC = 'assets/audio/family-photo-wall.mp3';
+  const SELECTION_MUSIC_VOLUME = 0.38;
+  const SELECTION_MUSIC_DUCKED_VOLUME = 0.12;
 
   // ── State ─────────────────────────────────────────────────────────
   const state = {
@@ -74,6 +76,7 @@
   let selectionMusic = null;
   let selectionMusicWanted = false;
   let selectionMusicRetryBound = false;
+  let selectionMusicDucked = false;
   let photoWallMusic = null;
   let photoWallMusicWanted = false;
   let photoWallMusicRetryBound = false;
@@ -83,7 +86,7 @@
     selectionMusic = new Audio(FAMILY_SELECTION_MUSIC);
     selectionMusic.preload = 'auto';
     selectionMusic.loop = true; // Native looping restarts at the beginning without a gap.
-    selectionMusic.volume = 0.38;
+    selectionMusic.volume = selectionMusicDucked ? SELECTION_MUSIC_DUCKED_VOLUME : SELECTION_MUSIC_VOLUME;
     return selectionMusic;
   }
 
@@ -109,9 +112,20 @@
 
   function stopSelectionMusic() {
     selectionMusicWanted = false;
+    selectionMusicDucked = false;
     if (!selectionMusic) return;
     selectionMusic.pause();
     selectionMusic.currentTime = 0;
+  }
+
+  function duckSelectionMusic() {
+    selectionMusicDucked = true;
+    if (selectionMusic) selectionMusic.volume = SELECTION_MUSIC_DUCKED_VOLUME;
+  }
+
+  function restoreSelectionMusic() {
+    selectionMusicDucked = false;
+    if (selectionMusic) selectionMusic.volume = SELECTION_MUSIC_VOLUME;
   }
 
   function getPhotoWallMusic() {
@@ -427,12 +441,14 @@
     const src = THIS_IS_MY_AUDIO[role];
     if (!src) { setTimeout(onDone, 1700); return; }
 
+    duckSelectionMusic();
     const audio = new Audio(src);
     let finished = false;
     const finish = () => {
       if (finished) return;
       finished = true;
       clearTimeout(fallback);
+      restoreSelectionMusic();
       onDone();
     };
     const fallback = setTimeout(finish, 3500);
