@@ -53,6 +53,8 @@
   const FAMILY_PHOTO_WALL_MUSIC = 'assets/audio/family-photo-wall.mp3';
   const SELECTION_MUSIC_VOLUME = 0.38;
   const SELECTION_MUSIC_DUCKED_VOLUME = 0.12;
+  const PHOTO_WALL_MUSIC_VOLUME = 0.38;
+  const PHOTO_WALL_MUSIC_DUCKED_VOLUME = 0.12;
 
   // ── State ─────────────────────────────────────────────────────────
   const state = {
@@ -80,6 +82,7 @@
   let photoWallMusic = null;
   let photoWallMusicWanted = false;
   let photoWallMusicRetryBound = false;
+  let photoWallMusicDucked = false;
 
   function getSelectionMusic() {
     if (selectionMusic) return selectionMusic;
@@ -133,7 +136,7 @@
     photoWallMusic = new Audio(FAMILY_PHOTO_WALL_MUSIC);
     photoWallMusic.preload = 'auto';
     photoWallMusic.loop = true;
-    photoWallMusic.volume = 0.38;
+    photoWallMusic.volume = photoWallMusicDucked ? PHOTO_WALL_MUSIC_DUCKED_VOLUME : PHOTO_WALL_MUSIC_VOLUME;
     return photoWallMusic;
   }
 
@@ -157,9 +160,20 @@
 
   function stopPhotoWallMusic() {
     photoWallMusicWanted = false;
+    photoWallMusicDucked = false;
     if (!photoWallMusic) return;
     photoWallMusic.pause();
     photoWallMusic.currentTime = 0;
+  }
+
+  function duckPhotoWallMusic() {
+    photoWallMusicDucked = true;
+    if (photoWallMusic) photoWallMusic.volume = PHOTO_WALL_MUSIC_DUCKED_VOLUME;
+  }
+
+  function restorePhotoWallMusic() {
+    photoWallMusicDucked = false;
+    if (photoWallMusic) photoWallMusic.volume = PHOTO_WALL_MUSIC_VOLUME;
   }
 
   // ── DOM refs ───────────────────────────────────────────────────────
@@ -877,7 +891,7 @@
 
     stopHintRotation();
     hideMeGlow();
-    stopPhotoWallMusic();
+    duckPhotoWallMusic();
     const speakerName = Profile.displayNameWithReading(entry.char.id)
                      || Profile.displayName(entry.char.id)
                      || capitalize(key);
@@ -894,9 +908,9 @@
           state.talkedTo.add(key);
           refreshCompletionMarks();
         }
-        // Conversation ambience is no longer needed once the player returns
-        // to the wall; resume the wall's own recorded music instead.
-        Ambient.stop();
+        // Keep the wall song in place for the conversation, then bring it
+        // back up once the player returns to the portrait wall.
+        restorePhotoWallMusic();
         startPhotoWallMusic();
         startHintRotation();
         refreshMeGlow();
