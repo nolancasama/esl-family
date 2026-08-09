@@ -266,6 +266,14 @@ html, body {
   background-position: center top;
   animation: choose-zoom-out 4.5s ease-out both;
 }
+#phase-choose.active.intro-linger.eye-opening::before {
+  animation: choose-zoom-out 4.5s ease-out both,
+             awakening-scene-sharpen 1.6s ease-out both;
+}
+@keyframes awakening-scene-sharpen {
+  0%   { filter: blur(2.5px); }
+  100% { filter: blur(0); }
+}
 @keyframes choose-zoom-out {
   0%   { transform: scale(1.7) translate(-13.6%, -2.9%); }  /* the castle gate */
   22%  { transform: scale(1.7) translate(-13.6%, -2.9%); }
@@ -1657,6 +1665,57 @@ html, body {
   transition: opacity .5s ease;
 }
 #scene-fade.active { opacity: 1; }
+
+/* ── First-person eye opening, immediately after the text intro ────────
+   The lids overlap at rest, then use broad curved inner edges rather than
+   rectangular wipes. The timings make a small first crack, a close, a wider
+   second look, and one quick natural blink before the view clears. */
+#eye-opening {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+#eye-opening.active { display: block; }
+.eyelid {
+  position: absolute;
+  left: -6vw;
+  width: 112vw;
+  height: 57vh;
+  height: 57dvh;
+  background: #000;
+  will-change: transform;
+}
+.eyelid-top {
+  top: -5vh;
+  top: -5dvh;
+  border-radius: 0 0 50% 48% / 0 0 13% 16%;
+  animation: upper-eyelid-awaken 1.8s cubic-bezier(.45,0,.55,1) both;
+}
+.eyelid-bottom {
+  bottom: -5vh;
+  bottom: -5dvh;
+  border-radius: 50% 48% 0 0 / 13% 16% 0 0;
+  animation: lower-eyelid-awaken 1.8s cubic-bezier(.45,0,.55,1) both;
+}
+@keyframes upper-eyelid-awaken {
+  0%, 12% { transform: translateY(0); }                 /* fully closed */
+  17%      { transform: translateY(-5vh); }              /* 0.3s: a crack */
+  39%      { transform: translateY(0); }                 /* 0.7s: close */
+  50%, 75% { transform: translateY(-25vh); }             /* 0.9s: wider */
+  80%      { transform: translateY(0); }                 /* 1.4s: blink */
+  89%, 100% { transform: translateY(-70vh); }            /* 1.6s: open */
+}
+@keyframes lower-eyelid-awaken {
+  0%, 12% { transform: translateY(0); }
+  17%      { transform: translateY(5vh); }
+  39%      { transform: translateY(0); }
+  50%, 75% { transform: translateY(25vh); }
+  80%      { transform: translateY(0); }
+  89%, 100% { transform: translateY(70vh); }
+}
 
 /* ── Responsive ───────────────────────────────────────────────────── */
 @media (max-width: 540px) {

@@ -246,6 +246,7 @@
   const completionMarks= $('completion-marks');
   const meGlow         = $('me-glow');
   const blackFade      = $('black-fade');
+  const eyeOpening     = $('eye-opening');
 
   // ── Boot ───────────────────────────────────────────────────────────
   const loadingScreen = $('loading-screen');
@@ -328,7 +329,7 @@
   showPhase('intro');
   Intro.start((name) => {
     state.playerName = name;
-    fadeTransition(() => enterChoosePhase());
+    eyeOpeningTransition(() => enterChoosePhase());
   });
 
   // ── ═══════════════════════════════════════════════════════════════
@@ -1065,6 +1066,24 @@
       midCallback();
       requestAnimationFrame(() => overlay.classList.remove('active'));
     }, SCENE_FADE_MS);
+  }
+
+  // The very first move from the text intro into the castle is deliberately
+  // different from ordinary phase fades: the scene is already running under
+  // a pair of curved lids, as though the player is waking up there.
+  let eyeOpeningTimer = null;
+  function eyeOpeningTransition(midCallback) {
+    clearTimeout(eyeOpeningTimer);
+    eyeOpening.classList.add('active'); // 0.0s: completely black
+    midCallback();
+    phases.choose.classList.add('eye-opening');
+
+    // 1.8s: lids have left the screen; the existing zoom/linger continues.
+    eyeOpeningTimer = setTimeout(() => {
+      eyeOpening.classList.remove('active');
+      phases.choose.classList.remove('eye-opening');
+      eyeOpeningTimer = null;
+    }, 1800);
   }
 
   function showFeedback(msg, type) {
