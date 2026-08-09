@@ -1667,9 +1667,8 @@ html, body {
 #scene-fade.active { opacity: 1; }
 
 /* ── First-person eye opening, immediately after the text intro ────────
-   The lids overlap at rest, then use broad curved inner edges rather than
-   rectangular wipes. The timings make a small first crack, a close, a wider
-   second look, and one quick natural blink before the view clears. */
+   A single black mask with a subtractive almond-shaped opening keeps both
+   curves complementary: it closes at the sides and is widest in the middle. */
 #eye-opening {
   position: fixed;
   inset: 0;
@@ -1679,42 +1678,15 @@ html, body {
   pointer-events: none;
 }
 #eye-opening.active { display: block; }
-.eyelid {
-  position: absolute;
-  left: -6vw;
-  width: 112vw;
-  height: 57vh;
-  height: 57dvh;
-  background: #000;
-  will-change: transform;
+#eye-opening svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
-.eyelid-top {
-  top: -5vh;
-  top: -5dvh;
-  border-radius: 0 0 50% 48% / 0 0 13% 16%;
-  animation: upper-eyelid-awaken 1.8s cubic-bezier(.45,0,.55,1) both;
-}
-.eyelid-bottom {
-  bottom: -5vh;
-  bottom: -5dvh;
-  border-radius: 50% 48% 0 0 / 13% 16% 0 0;
-  animation: lower-eyelid-awaken 1.8s cubic-bezier(.45,0,.55,1) both;
-}
-@keyframes upper-eyelid-awaken {
-  0%, 12% { transform: translateY(0); }                 /* fully closed */
-  17%      { transform: translateY(-5vh); }              /* 0.3s: a crack */
-  39%      { transform: translateY(0); }                 /* 0.7s: close */
-  50%, 75% { transform: translateY(-25vh); }             /* 0.9s: wider */
-  80%      { transform: translateY(0); }                 /* 1.4s: blink */
-  89%, 100% { transform: translateY(-70vh); }            /* 1.6s: open */
-}
-@keyframes lower-eyelid-awaken {
-  0%, 12% { transform: translateY(0); }
-  17%      { transform: translateY(5vh); }
-  39%      { transform: translateY(0); }
-  50%, 75% { transform: translateY(25vh); }
-  80%      { transform: translateY(0); }
-  89%, 100% { transform: translateY(70vh); }
+#eye-opening.active svg { animation: eye-mask-clear 1.8s linear both; }
+@keyframes eye-mask-clear {
+  0%, 88.8% { opacity: 1; }
+  89%, 100% { opacity: 0; }
 }
 
 /* ── Responsive ───────────────────────────────────────────────────── */

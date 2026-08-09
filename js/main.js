@@ -247,6 +247,7 @@
   const meGlow         = $('me-glow');
   const blackFade      = $('black-fade');
   const eyeOpening     = $('eye-opening');
+  const eyeOpeningMaskAnimation = $('eye-opening-mask-animation');
 
   // ── Boot ───────────────────────────────────────────────────────────
   const loadingScreen = $('loading-screen');
@@ -1074,7 +1075,12 @@
   let eyeOpeningTimer = null;
   function eyeOpeningTransition(midCallback) {
     clearTimeout(eyeOpeningTimer);
+    eyeOpening.classList.remove('active');
+    void eyeOpening.offsetWidth; // restart the CSS fade if this transition is replayed
     eyeOpening.classList.add('active'); // 0.0s: completely black
+    if (eyeOpeningMaskAnimation && eyeOpeningMaskAnimation.beginElement) {
+      eyeOpeningMaskAnimation.beginElement();
+    }
     midCallback();
     phases.choose.classList.add('eye-opening');
 
