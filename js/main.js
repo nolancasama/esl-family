@@ -330,7 +330,7 @@
   showPhase('intro');
   Intro.start((name) => {
     state.playerName = name;
-    eyeOpeningTransition(() => enterChoosePhase());
+    fadeTransition(() => enterChoosePhase());
   });
 
   // ── ═══════════════════════════════════════════════════════════════
